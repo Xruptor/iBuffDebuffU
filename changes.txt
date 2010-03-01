@@ -1,0 +1,12 @@
+-Added: even more checks for debuffs/buffs to make sure they are player casted.
+-Added: Option to toggle debuffs for Target on/off.
+-Added: Option to toggle buffs for Target on/off.
+-Added: Option to toggle debuffs for Focus on/off.
+-Added: Option to toggle bufs for Focus on/off.
+-Fixed: An issue where sometimes settings may revert.
+-Fixed: No buffs/debuffs will show on the focus window if the focus is the player.
+-Updated: Localization CHN and TWN.  Thanks to wowui.cn.
+
+
+-Need to add a way to limit the amount of buffs on the player
+-Need a way to filter the buffs on the player by duration (use a slider)
