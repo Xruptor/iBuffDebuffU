@@ -3,7 +3,6 @@
 	--Code adapted from Tuller's OmniCC Options Panel, (Thanks Tuller)
 --]]
 
-
 local OptionsPlayer = CreateFrame('Frame', 'iBuffDebuffUPlayerOptionsFrame', InterfaceOptionsFramePanelContainer)
 
 function OptionsPlayer:Load(parent, addonname)
@@ -15,13 +14,41 @@ function OptionsPlayer:Load(parent, addonname)
 	
 end
 
---[[ Panels ]]--
-
---Display
 function OptionsPlayer:AddDisplayPanel()
+	
+	local tab1Frame = self:CreateTab1(self)
+	local tab2Frame = self:CreateTab2(self)
+
+	local tektab = LibStub("tekKonfig-TopTab")
+	local tab1 = tektab.new(self, L_IBDU_TAB_1, "BOTTOMLEFT", self, "TOPLEFT", 190, -4)
+	local tab2 = tektab.new(self, L_IBDU_TAB_2, "LEFT", tab1, "RIGHT", -15, 0)
+	
+	tab2:Deactivate()
+	tab1:SetScript("OnClick", function(self)
+		self:Activate()
+		tab2:Deactivate()
+		tab1Frame:Show()
+		tab2Frame:Hide()
+	end)
+	tab2:SetScript("OnClick", function(self)
+		self:Activate()
+		tab1:Deactivate()
+		tab1Frame:Hide()
+		tab2Frame:Show()
+	end)
+	
+	tab1Frame:Show()
+	tab2Frame:Hide()
+	
+end
+
+function OptionsPlayer:CreateTab1(parent)
+
+	local tabFrame = CreateFrame('Frame', parent:GetName().."Tab1", parent)
+	tabFrame:SetAllPoints(parent)
 
 	--Bars grow UP/DOWN
-	local growBars = self:CreateCheckButton(L_IBDU_OPT1, self)
+	local growBars = self:CreateCheckButton(L_IBDU_OPT1, tabFrame)
 	growBars:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].grow) end)
 	growBars:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["player"].grow = self:GetChecked() or false
@@ -30,7 +57,7 @@ function OptionsPlayer:AddDisplayPanel()
 	growBars:SetPoint('TOPLEFT', 10, -20)
 
 	--use hhmmss format
-	local useHHMMSS = self:CreateCheckButton(L_IBDU_OPT2, self)
+	local useHHMMSS = self:CreateCheckButton(L_IBDU_OPT2, tabFrame)
 	useHHMMSS:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].hhmmss) end)
 	useHHMMSS:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["player"].hhmmss = self:GetChecked() or false
@@ -38,7 +65,7 @@ function OptionsPlayer:AddDisplayPanel()
 	useHHMMSS:SetPoint('TOP', growBars, 'BOTTOM', 0, -1)
 	
 	--show rank
-	local showRank = self:CreateCheckButton(L_IBDU_OPT3, self)
+	local showRank = self:CreateCheckButton(L_IBDU_OPT3, tabFrame)
 	showRank:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].rank) end)
 	showRank:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["player"].rank = self:GetChecked() or false
@@ -46,7 +73,7 @@ function OptionsPlayer:AddDisplayPanel()
 	showRank:SetPoint('TOP', useHHMMSS, 'BOTTOM', 0, -1)
 
 	--show stacks
-	local showStacks = self:CreateCheckButton(L_IBDU_OPT4, self)
+	local showStacks = self:CreateCheckButton(L_IBDU_OPT4, tabFrame)
 	showStacks:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].stack) end)
 	showStacks:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["player"].stack = self:GetChecked() or false
@@ -54,7 +81,7 @@ function OptionsPlayer:AddDisplayPanel()
 	showStacks:SetPoint('TOP', showRank, 'BOTTOM', 0, -1)
 	
 	--show tooltips
-	local showTooltips = self:CreateCheckButton(L_IBDU_OPT5, self)
+	local showTooltips = self:CreateCheckButton(L_IBDU_OPT5, tabFrame)
 	showTooltips:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].tooltips) end)
 	showTooltips:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["player"].tooltips = self:GetChecked() or false
@@ -62,7 +89,7 @@ function OptionsPlayer:AddDisplayPanel()
 	showTooltips:SetPoint('TOP', showStacks, 'BOTTOM', 0, -1)
 	
 	--show player buffs
-	local showplayerB = self:CreateCheckButton(L_IBDU_OPT6, self)
+	local showplayerB = self:CreateCheckButton(L_IBDU_OPT6, tabFrame)
 	showplayerB:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.showplayerBuffs) end)
 	showplayerB:SetScript('OnClick', function(self)
 		IBDU_DB.Opts.showplayerBuffs = self:GetChecked() or false
@@ -71,7 +98,7 @@ function OptionsPlayer:AddDisplayPanel()
 	showplayerB:SetPoint('TOP', showTooltips, 'BOTTOM', 0, -1)
 	
 	--show player debuffs
-	local showPlayerD = self:CreateCheckButton(L_IBDU_OPT7, self)
+	local showPlayerD = self:CreateCheckButton(L_IBDU_OPT7, tabFrame)
 	showPlayerD:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.showplayerDebuffs) end)
 	showPlayerD:SetScript('OnClick', function(self)
 		IBDU_DB.Opts.showplayerDebuffs = self:GetChecked() or false
@@ -80,7 +107,7 @@ function OptionsPlayer:AddDisplayPanel()
 	showPlayerD:SetPoint('TOP', showplayerB, 'BOTTOM', 0, -1)
 
 	--show player debuffs
-	local showPlayerDColor = self:CreateCheckButton(L_IBDU_OPT10, self)
+	local showPlayerDColor = self:CreateCheckButton(L_IBDU_OPT10, tabFrame)
 	showPlayerDColor:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.playerDebuffColoring) end)
 	showPlayerDColor:SetScript('OnClick', function(self)
 		IBDU_DB.Opts.playerDebuffColoring = self:GetChecked() or false
@@ -88,10 +115,18 @@ function OptionsPlayer:AddDisplayPanel()
 	end)
 	showPlayerDColor:SetPoint('TOP', showPlayerD, 'BOTTOM', 0, -1)
 	
+	return tabFrame
+	
+end
 
-	local panel = self:CreatePanel(L_IBDU_OPT9)
+function OptionsPlayer:CreateTab2(parent)
+
+	local tabFrame = CreateFrame('Frame', parent:GetName().."Tab2", parent)
+	tabFrame:SetAllPoints(parent)
+
+	local panel = self:CreatePanel(L_IBDU_OPT9, tabFrame)
 	panel:SetWidth(392); panel:SetHeight(148)
-	panel:SetPoint('BOTTOMLEFT', 10, 10)
+	panel:SetPoint('TOPLEFT', 10, -30)
 	
 	local fs_scale = self:formatSlider(L_IBDU_OPT_SLIDER1, "scale", panel, 1, 5, 0.1)
 	fs_scale:SetPoint('TOPLEFT', 10, -22)
@@ -116,7 +151,9 @@ function OptionsPlayer:AddDisplayPanel()
 	
 	local fs_bdistance = self:formatSlider(L_IBDU_OPT_SLIDER8, "bufferdist", panel, 0, 20, 1)
 	fs_bdistance:SetPoint('TOPLEFT', fs_fontalpha, 'BOTTOMLEFT', 0, -17)
-
+	
+	return tabFrame
+	
 end
 
 --[[
@@ -162,8 +199,8 @@ do
 end
 
 --create panel
-function OptionsPlayer:CreatePanel(name)
-	local panel = CreateFrame('Frame', self:GetName() .. name, self, 'OptionsBoxTemplate')
+function OptionsPlayer:CreatePanel(name, parent)
+	local panel = CreateFrame('Frame', self:GetName() .. name, parent, 'OptionsBoxTemplate')
 	panel:SetBackdropBorderColor(0.4, 0.4, 0.4)
 	panel:SetBackdropColor(0.15, 0.15, 0.15, 0.5)
 	getglobal(panel:GetName() .. 'Title'):SetText(name)

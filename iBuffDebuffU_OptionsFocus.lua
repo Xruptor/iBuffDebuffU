@@ -19,8 +19,39 @@ end
 --Display
 function OptionsFocus:AddDisplayPanel()
 
+	local tab1Frame = self:CreateTab1(self)
+	local tab2Frame = self:CreateTab2(self)
+
+	local tektab = LibStub("tekKonfig-TopTab")
+	local tab1 = tektab.new(self, L_IBDU_TAB_1, "BOTTOMLEFT", self, "TOPLEFT", 190, -4)
+	local tab2 = tektab.new(self, L_IBDU_TAB_2, "LEFT", tab1, "RIGHT", -15, 0)
+	
+	tab2:Deactivate()
+	tab1:SetScript("OnClick", function(self)
+		self:Activate()
+		tab2:Deactivate()
+		tab1Frame:Show()
+		tab2Frame:Hide()
+	end)
+	tab2:SetScript("OnClick", function(self)
+		self:Activate()
+		tab1:Deactivate()
+		tab1Frame:Hide()
+		tab2Frame:Show()
+	end)
+	
+	tab1Frame:Show()
+	tab2Frame:Hide()
+	
+end
+
+function OptionsFocus:CreateTab1(parent)
+
+	local tabFrame = CreateFrame('Frame', parent:GetName().."Tab1", parent)
+	tabFrame:SetAllPoints(parent)
+
 	--Bars grow UP/DOWN
-	local growBars = self:CreateCheckButton(L_IBDU_OPT1, self)
+	local growBars = self:CreateCheckButton(L_IBDU_OPT1, tabFrame)
 	growBars:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["focus"].grow) end)
 	growBars:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["focus"].grow = self:GetChecked() or false
@@ -29,7 +60,7 @@ function OptionsFocus:AddDisplayPanel()
 	growBars:SetPoint('TOPLEFT', 10, -20)
 
 	--use hhmmss format
-	local useHHMMSS = self:CreateCheckButton(L_IBDU_OPT2, self)
+	local useHHMMSS = self:CreateCheckButton(L_IBDU_OPT2, tabFrame)
 	useHHMMSS:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["focus"].hhmmss) end)
 	useHHMMSS:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["focus"].hhmmss = self:GetChecked() or false
@@ -37,7 +68,7 @@ function OptionsFocus:AddDisplayPanel()
 	useHHMMSS:SetPoint('TOP', growBars, 'BOTTOM', 0, -1)
 	
 	--show rank
-	local showRank = self:CreateCheckButton(L_IBDU_OPT3, self)
+	local showRank = self:CreateCheckButton(L_IBDU_OPT3, tabFrame)
 	showRank:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["focus"].rank) end)
 	showRank:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["focus"].rank = self:GetChecked() or false
@@ -45,7 +76,7 @@ function OptionsFocus:AddDisplayPanel()
 	showRank:SetPoint('TOP', useHHMMSS, 'BOTTOM', 0, -1)
 
 	--show stacks
-	local showStacks = self:CreateCheckButton(L_IBDU_OPT4, self)
+	local showStacks = self:CreateCheckButton(L_IBDU_OPT4, tabFrame)
 	showStacks:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["focus"].stack) end)
 	showStacks:SetScript('OnClick', function(self)
 		IBDU_DB.Opts["focus"].stack = self:GetChecked() or false
@@ -53,7 +84,7 @@ function OptionsFocus:AddDisplayPanel()
 	showStacks:SetPoint('TOP', showRank, 'BOTTOM', 0, -1)
 	
 	--show focus buffs
-	local showFocusB = self:CreateCheckButton(L_IBDU_OPT13, self)
+	local showFocusB = self:CreateCheckButton(L_IBDU_OPT13, tabFrame)
 	showFocusB:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.showfocusBuffs) end)
 	showFocusB:SetScript('OnClick', function(self)
 		IBDU_DB.Opts.showfocusBuffs = self:GetChecked() or false
@@ -62,7 +93,7 @@ function OptionsFocus:AddDisplayPanel()
 	showFocusB:SetPoint('TOP', showStacks, 'BOTTOM', 0, -1)
 	
 	--show focus debuffs
-	local showFocusD = self:CreateCheckButton(L_IBDU_OPT14, self)
+	local showFocusD = self:CreateCheckButton(L_IBDU_OPT14, tabFrame)
 	showFocusD:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.showfocusDebuffs) end)
 	showFocusD:SetScript('OnClick', function(self)
 		IBDU_DB.Opts.showfocusDebuffs = self:GetChecked() or false
@@ -70,9 +101,18 @@ function OptionsFocus:AddDisplayPanel()
 	end)
 	showFocusD:SetPoint('TOP', showFocusB, 'BOTTOM', 0, -1)
 	
-	local panel = self:CreatePanel(L_IBDU_OPT9)
+	return tabFrame
+	
+end
+
+function OptionsFocus:CreateTab2(parent)
+
+	local tabFrame = CreateFrame('Frame', parent:GetName().."Tab2", parent)
+	tabFrame:SetAllPoints(parent)
+
+	local panel = self:CreatePanel(L_IBDU_OPT9, tabFrame)
 	panel:SetWidth(392); panel:SetHeight(148)
-	panel:SetPoint('BOTTOMLEFT', 10, 10)
+	panel:SetPoint('TOPLEFT', 10, -30)
 	
 	local fs_scale = self:formatSlider(L_IBDU_OPT_SLIDER1, "scale", panel, 1, 5, 0.1)
 	fs_scale:SetPoint('TOPLEFT', 10, -22)
@@ -97,7 +137,9 @@ function OptionsFocus:AddDisplayPanel()
 	
 	local fs_bdistance = self:formatSlider(L_IBDU_OPT_SLIDER8, "bufferdist", panel, 0, 20, 1)
 	fs_bdistance:SetPoint('TOPLEFT', fs_fontalpha, 'BOTTOMLEFT', 0, -17)
-
+	
+	return tabFrame
+	
 end
 
 --[[
@@ -143,8 +185,8 @@ do
 end
 
 --create panel
-function OptionsFocus:CreatePanel(name)
-	local panel = CreateFrame('Frame', self:GetName() .. name, self, 'OptionsBoxTemplate')
+function OptionsFocus:CreatePanel(name, parent)
+	local panel = CreateFrame('Frame', self:GetName() .. name, parent, 'OptionsBoxTemplate')
 	panel:SetBackdropBorderColor(0.4, 0.4, 0.4)
 	panel:SetBackdropColor(0.15, 0.15, 0.15, 0.5)
 	getglobal(panel:GetName() .. 'Title'):SetText(name)

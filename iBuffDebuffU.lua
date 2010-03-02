@@ -45,6 +45,8 @@ local defaults = {
 		["showfocusBuffs"] = true,
 		["showfocusDebuffs"] = true,
 		['playerDebuffColoring'] = false,
+		['totalPlayerBuffCount'] = 40,
+		['totalPlayerDebuffCount'] = 40,
 		["enable"] = true,
 		["player"] = barDefaults,
 		["target"] = barDefaults,
@@ -425,7 +427,7 @@ function f:ProcessAuras(unit, sdTimer)
 	if pass then
 		for i=1, 40 do
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
-			if name then
+			if name and unitCaster then
 				local passNow = (unit ~= "player" and unitCaster == "player") or (unit == "player") or false
 				if passNow then
 					index = index + 1
@@ -462,7 +464,7 @@ function f:ProcessAuras(unit, sdTimer)
 	if passD then
 		for i=1, 40 do
 			local name, _, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
-			if name then
+			if name and unitCaster then
 				local passNow = (unit ~= "player" and unitCaster == "player") or (unit == "player") or false
 				if passNow then
 					index = index + 1

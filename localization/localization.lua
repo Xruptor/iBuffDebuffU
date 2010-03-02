@@ -39,6 +39,9 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_PANEL_2 = "目标设置"
 	L_IBDU_PANEL_3 = "焦点设置"
 	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
+		
 elseif ( GetLocale() == "ruRU" )  then
 
 	L_IBDU_SLASHOPT1 = "anchor"
@@ -75,6 +78,9 @@ elseif ( GetLocale() == "ruRU" )  then
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"
 	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
+		
 elseif ( GetLocale() == "zhTW" ) then
 	--special thanks to www.wowui.cn
 	
@@ -112,6 +118,9 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_PANEL_2 = "目標設定"
 	L_IBDU_PANEL_3 = "焦點設定"
 	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
+		
 elseif ( GetLocale() == "frFR" ) then
 
 	L_IBDU_SLASHOPT1 = "anchor"
@@ -148,6 +157,9 @@ elseif ( GetLocale() == "frFR" ) then
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"
 	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
+		
 elseif ( GetLocale() == "koKR" ) then
 
 	L_IBDU_SLASHOPT1 = "anchor"
@@ -183,6 +195,9 @@ elseif ( GetLocale() == "koKR" ) then
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"
+	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
 	
 else
 
@@ -223,5 +238,8 @@ else
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"
+	
+	L_IBDU_TAB_1 = "General"
+	L_IBDU_TAB_2 = "Settings"
 	
 end
