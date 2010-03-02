@@ -33,6 +33,9 @@ local barDefaults = {
 		["stack"] = true,
 		["bufferdist"] = 4, --distance between bars
 		["hhmmss"] = false,
+		['totalBuffCount'] = 40,
+		['totalDebuffCount'] = 40,
+		['limitTime'] = 0,
 }
 
 local defaults = {
@@ -45,8 +48,6 @@ local defaults = {
 		["showfocusBuffs"] = true,
 		["showfocusDebuffs"] = true,
 		['playerDebuffColoring'] = false,
-		['totalPlayerBuffCount'] = 40,
-		['totalPlayerDebuffCount'] = 40,
 		["enable"] = true,
 		["player"] = barDefaults,
 		["target"] = barDefaults,
@@ -144,6 +145,9 @@ function f:PLAYER_LOGIN()
 	end
 	
 	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r [v|cFFDF2B2B"..ver.."|r] loaded: /ibdu")
+	
+	--do a bar apperance update one last time (corrects certain alpha levels)
+	f:ModifyApperance_All()
 	
 	f:UnregisterEvent("PLAYER_LOGIN")
 	f.PLAYER_LOGIN = nil
@@ -308,6 +312,7 @@ function f:CreateTimers(unit)
 	Frm:SetHeight(IBDU_DB.Opts[unit].height)
 	Frm:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\statusbar")
 	Frm:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
+	Frm:SetAlpha(IBDU_DB.Opts[unit].alpha)
 	Frm:EnableMouse(true)
 
 	Frm.bg = CreateFrame("StatusBar", nil, Frm)
@@ -317,6 +322,7 @@ function f:CreateTimers(unit)
 	Frm.bg:SetFrameLevel(0)
 	Frm.bg:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\statusbar")
 	Frm.bg:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha_bg)
+	Frm.bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
 	Frm.bg:EnableMouse(true)
 
 	--icon
@@ -423,12 +429,19 @@ function f:ProcessAuras(unit, sdTimer)
 	if unit == "player" and not IBDU_DB.Opts.showplayerBuffs then pass = false end
 	if unit == "target" and not IBDU_DB.Opts.showtargetBuffs then pass = false end
 	if unit == "focus" and not IBDU_DB.Opts.showfocusBuffs then pass = false end
-	
+
+	--['limitTime'] = 0,
+		
 	if pass then
 		for i=1, 40 do
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
-			if name and unitCaster then
-				local passNow = (unit ~= "player" and unitCaster == "player") or (unit == "player") or false
+			if name then
+				
+				local passNow = false
+				if unit == "player" then passNow = true end
+				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+				
 				if passNow then
 					index = index + 1
 					bData[index] = {}
@@ -465,7 +478,12 @@ function f:ProcessAuras(unit, sdTimer)
 		for i=1, 40 do
 			local name, _, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name and unitCaster then
-				local passNow = (unit ~= "player" and unitCaster == "player") or (unit == "player") or false
+				
+				local passNow = false
+				if unit == "player" then passNow = true end
+				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalDebuffCount then passNow = false end
+				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+				
 				if passNow then
 					index = index + 1
 					bData[index] = {}
@@ -522,26 +540,30 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local itemLink = GetInventoryItemLink('player', INVSLOT_MAINHAND)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_MAINHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
-
-		index = index + 1
-		bData[index] = {}
-		bData[index].auraType = "buff"
-		bData[index].itemLink = itemLink
-		bData[index].enchant = true
-		bData[index].id = unit
-		bData[index].auraID = INVSLOT_MAINHAND
-		bData[index].spellName = name
-		bData[index].rank = '*'
-		bData[index].iconTex = icon
-		bData[index].stacks = MHCharges or 0
-		bData[index].duration = duration or 0
-		bData[index].expTime = expTime
-		bData[index].startTime = expTime and duration and max(0, expTime - duration) or 0
-		bData[index].timeleft = expTime and max(0, expTime - GetTime()) or 0
-		bData[index].lastUpdate = GetTime()
-		bData[index].unitCaster = 'player'
-		bData[index].spellId = 1
-		bData[index].active = true
+		local passNow = true
+		
+		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+		if passNow then
+			index = index + 1
+			bData[index] = {}
+			bData[index].auraType = "buff"
+			bData[index].itemLink = itemLink
+			bData[index].enchant = true
+			bData[index].id = unit
+			bData[index].auraID = INVSLOT_MAINHAND
+			bData[index].spellName = name
+			bData[index].rank = '*'
+			bData[index].iconTex = icon
+			bData[index].stacks = MHCharges or 0
+			bData[index].duration = duration or 0
+			bData[index].expTime = expTime
+			bData[index].startTime = expTime and duration and max(0, expTime - duration) or 0
+			bData[index].timeleft = expTime and max(0, expTime - GetTime()) or 0
+			bData[index].lastUpdate = GetTime()
+			bData[index].unitCaster = 'player'
+			bData[index].spellId = 1
+			bData[index].active = true
+		end
 	end
 
 	if ( hasOHEnh and not f.enhOH) then
@@ -553,26 +575,30 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local itemLink = GetInventoryItemLink('player', INVSLOT_SECONDHAND)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_SECONDHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
-
-		index = index + 1
-		bData[index] = {}
-		bData[index].auraType = "buff"
-		bData[index].itemLink = itemLink
-		bData[index].enchant = true
-		bData[index].id = unit
-		bData[index].auraID = INVSLOT_SECONDHAND
-		bData[index].spellName = name
-		bData[index].rank = '*'
-		bData[index].iconTex = icon
-		bData[index].stacks = OHCharges or 0
-		bData[index].duration = duration or 0
-		bData[index].expTime = expTime
-		bData[index].startTime = expTime and duration and max(0, expTime - duration) or 0
-		bData[index].timeleft = expTime and max(0, expTime - GetTime()) or 0
-		bData[index].lastUpdate = GetTime()
-		bData[index].unitCaster = 'player'
-		bData[index].spellId = 2
-		bData[index].active = true
+		local passNow = true
+		
+		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+		if passNow then
+			index = index + 1
+			bData[index] = {}
+			bData[index].auraType = "buff"
+			bData[index].itemLink = itemLink
+			bData[index].enchant = true
+			bData[index].id = unit
+			bData[index].auraID = INVSLOT_SECONDHAND
+			bData[index].spellName = name
+			bData[index].rank = '*'
+			bData[index].iconTex = icon
+			bData[index].stacks = OHCharges or 0
+			bData[index].duration = duration or 0
+			bData[index].expTime = expTime
+			bData[index].startTime = expTime and duration and max(0, expTime - duration) or 0
+			bData[index].timeleft = expTime and max(0, expTime - GetTime()) or 0
+			bData[index].lastUpdate = GetTime()
+			bData[index].unitCaster = 'player'
+			bData[index].spellId = 2
+			bData[index].active = true
+		end
 	end
 
 	--this is to prevent the enchant from being displayed again, there is a delay between UNIT_AURA
@@ -783,9 +809,9 @@ function f:ModifyApperance(unit, sdTimer)
 	for i=1, #sdTimer do
 		
 		--set normal bars
-		sdTimer[i]:SetAlpha(IBDU_DB.Opts[unit].alpha)
 		sdTimer[i]:SetWidth(IBDU_DB.Opts[unit].width)
 		sdTimer[i]:SetHeight(IBDU_DB.Opts[unit].height)
+		sdTimer[i]:SetAlpha(IBDU_DB.Opts[unit].alpha)
 		
 		--set bg alpha
 		sdTimer[i].bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
@@ -892,8 +918,8 @@ function f:GetTimeText(unit, timeLeft)
 	end
 
 	seconds = timeLeft > 0 and timeLeft or 0
-
-	if not IBDU_DB.Opts[unit].hhmmss then
+	
+	if not unit or (IBDU_DB.Opts[unit] and not IBDU_DB.Opts[unit].hhmmss) then
 		if hours > 0 then
 			return string.format("%dh",hours)
 		elseif minutes > 0 then
@@ -910,8 +936,10 @@ function f:GetTimeText(unit, timeLeft)
 	else
 		if( hours > 0 ) then
 			return string.format("%d:%02d:%02d", hours, minutes, seconds)
-		else
+		elseif minutes > 0 or seconds > 0 then
 			return string.format("%02d:%02d", minutes > 0 and minutes or 0, seconds)
+		else
+			return nil
 		end
 	end
 	

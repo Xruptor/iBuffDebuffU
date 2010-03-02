@@ -25,6 +25,11 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_OPT8 = "隐藏暴雪 buff 框体"
 	L_IBDU_OPT9 = "计时条大小和缩放"
 	L_IBDU_OPT10 = "使用 Debuff 着色  |cFF99CC33[诅咒, 毒药, 魔法, 疾病]|r"
+	L_IBDU_OPT11 = "Show target buff bars"
+	L_IBDU_OPT12 = "Show target debuff bars"
+	L_IBDU_OPT13 = "Show focus buff bars"
+	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "缩放"
 	L_IBDU_OPT_SLIDER2 = "宽"
@@ -34,6 +39,9 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_OPT_SLIDER6 = "计时条背景透明度"
 	L_IBDU_OPT_SLIDER7 = "字型透明度"
 	L_IBDU_OPT_SLIDER8 = "计时条距离"
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
 	
 	L_IBDU_PANEL_1 = "玩家设置"
 	L_IBDU_PANEL_2 = "目标设置"
@@ -64,6 +72,11 @@ elseif ( GetLocale() == "ruRU" )  then
 	L_IBDU_OPT8 = "Hide Blizzard buff frames"
 	L_IBDU_OPT9 = "Bar Sizing and Scaling"
 	L_IBDU_OPT10 = "Use Debuff Coloring  |cFF99CC33[Curse, Poison, Magic, Disease]|r"
+	L_IBDU_OPT11 = "Show target buff bars"
+	L_IBDU_OPT12 = "Show target debuff bars"
+	L_IBDU_OPT13 = "Show focus buff bars"
+	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -73,6 +86,9 @@ elseif ( GetLocale() == "ruRU" )  then
 	L_IBDU_OPT_SLIDER6 = "Bar BG Alpha"
 	L_IBDU_OPT_SLIDER7 = "Font Alpha"
 	L_IBDU_OPT_SLIDER8 = "Bar Distance"
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
 	
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
@@ -104,6 +120,11 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_OPT8 = "隱藏暴雪 buff 框體"
 	L_IBDU_OPT9 = "計時條大小和縮放"
 	L_IBDU_OPT10 = "使用 Debuff 著色  |cFF99CC33[詛咒, 毒藥, 魔法, 疾病]|r"
+	L_IBDU_OPT11 = "Show target buff bars"
+	L_IBDU_OPT12 = "Show target debuff bars"
+	L_IBDU_OPT13 = "Show focus buff bars"
+	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "縮放"
 	L_IBDU_OPT_SLIDER2 = "寬"
@@ -113,6 +134,9 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_OPT_SLIDER6 = "計時條背景透明度"
 	L_IBDU_OPT_SLIDER7 = "字型透明度"
 	L_IBDU_OPT_SLIDER8 = "計時條距離"
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
 	
 	L_IBDU_PANEL_1 = "玩家設定"
 	L_IBDU_PANEL_2 = "目標設定"
@@ -143,6 +167,11 @@ elseif ( GetLocale() == "frFR" ) then
 	L_IBDU_OPT8 = "Hide Blizzard buff frames"
 	L_IBDU_OPT9 = "Bar Sizing and Scaling"
 	L_IBDU_OPT10 = "Use Debuff Coloring  |cFF99CC33[Curse, Poison, Magic, Disease]|r"
+	L_IBDU_OPT11 = "Show target buff bars"
+	L_IBDU_OPT12 = "Show target debuff bars"
+	L_IBDU_OPT13 = "Show focus buff bars"
+	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -152,6 +181,9 @@ elseif ( GetLocale() == "frFR" ) then
 	L_IBDU_OPT_SLIDER6 = "Bar BG Alpha"
 	L_IBDU_OPT_SLIDER7 = "Font Alpha"
 	L_IBDU_OPT_SLIDER8 = "Bar Distance"
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
 	
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
@@ -182,6 +214,11 @@ elseif ( GetLocale() == "koKR" ) then
 	L_IBDU_OPT8 = "Hide Blizzard buff frames"
 	L_IBDU_OPT9 = "Bar Sizing and Scaling"
 	L_IBDU_OPT10 = "Use Debuff Coloring  |cFF99CC33[Curse, Poison, Magic, Disease]|r"
+	L_IBDU_OPT11 = "Show target buff bars"
+	L_IBDU_OPT12 = "Show target debuff bars"
+	L_IBDU_OPT13 = "Show focus buff bars"
+	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -191,7 +228,10 @@ elseif ( GetLocale() == "koKR" ) then
 	L_IBDU_OPT_SLIDER6 = "Bar BG Alpha"
 	L_IBDU_OPT_SLIDER7 = "Font Alpha"
 	L_IBDU_OPT_SLIDER8 = "Bar Distance"
-	
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
+		
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"
@@ -225,6 +265,7 @@ else
 	L_IBDU_OPT12 = "Show target debuff bars"
 	L_IBDU_OPT13 = "Show focus buff bars"
 	L_IBDU_OPT14 = "Show focus debuff bars"
+	L_IBDU_OPT15 = "Filters"
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -234,7 +275,10 @@ else
 	L_IBDU_OPT_SLIDER6 = "Bar BG Alpha"
 	L_IBDU_OPT_SLIDER7 = "Font Alpha"
 	L_IBDU_OPT_SLIDER8 = "Bar Distance"
-
+	L_IBDU_OPT_SLIDER9 = "Limit by Time"
+	L_IBDU_OPT_SLIDER10 = "Buff Display Count"
+	L_IBDU_OPT_SLIDER11 = "Debuff Display Count"
+	
 	L_IBDU_PANEL_1 = "Player Settings"
 	L_IBDU_PANEL_2 = "Target Settings"
 	L_IBDU_PANEL_3 = "Focus Settings"

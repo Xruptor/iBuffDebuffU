@@ -152,6 +152,20 @@ function OptionsPlayer:CreateTab2(parent)
 	local fs_bdistance = self:formatSlider(L_IBDU_OPT_SLIDER8, "bufferdist", panel, 0, 20, 1)
 	fs_bdistance:SetPoint('TOPLEFT', fs_fontalpha, 'BOTTOMLEFT', 0, -17)
 	
+	--panel two
+	local panel2 = self:CreatePanel(L_IBDU_OPT15, tabFrame)
+	panel2:SetWidth(392); panel2:SetHeight(130)
+	panel2:SetPoint('TOPLEFT', panel, 'BOTTOMLEFT', 0, -17)
+	
+	local fs_filtertime = self:formatSlider(L_IBDU_OPT_SLIDER9, "limitTime", panel2, 0, 18000, 60, 1)
+	fs_filtertime:SetPoint('TOPLEFT', 10, -22)
+	
+	local fs_totalBuff = self:formatSlider(L_IBDU_OPT_SLIDER10, "totalBuffCount", panel2, 1, 40, 1, 2)
+	fs_totalBuff:SetPoint('TOPLEFT', fs_filtertime, 'BOTTOMLEFT', 0, -20)
+	
+	local fs_totalDebuff = self:formatSlider(L_IBDU_OPT_SLIDER11, "totalDebuffCount", panel2, 1, 40, 1, 2)
+	fs_totalDebuff:SetPoint('TOPLEFT', fs_totalBuff, 'BOTTOMLEFT', 0, -20)
+
 	return tabFrame
 	
 end
@@ -176,9 +190,10 @@ do
 		end
 	end
 
-	function OptionsPlayer:CreateSlider(text, parent, low, high, step)
+	function OptionsPlayer:CreateSlider(text, parent, low, high, step, func)
 		local name = parent:GetName() .. text
 		local slider = CreateFrame('Slider', name, parent, 'OptionsSliderTemplate')
+		slider.tFunc = func or nil
 		slider:SetScript('OnMouseWheel', Slider_OnMouseWheel)
 		slider:SetMinMaxValues(low, high)
 		slider:SetValueStep(step)
@@ -209,9 +224,9 @@ function OptionsPlayer:CreatePanel(name, parent)
 end
 
 --create formatSlider
-function OptionsPlayer:formatSlider(name, key, parent, low, high, step)
+function OptionsPlayer:formatSlider(name, key, parent, low, high, step, func)
 
-	local slider = self:CreateSlider(name, parent, low, high, step)
+	local slider = self:CreateSlider(name, parent, low, high, step, func)
 	slider:SetScript('OnShow', function(self)
 		self.onShow = true
 		self:SetValue(IBDU_DB.Opts["player"][key])
@@ -219,11 +234,20 @@ function OptionsPlayer:formatSlider(name, key, parent, low, high, step)
 		self.iKey = key
 	end)
 	slider:SetScript('OnValueChanged', function(self, value)
-		self.valText:SetText(format('%.1f', value))
-		if not self.onShow then
+		if self.tFunc and self.tFunc == 1 then
+			local flip = iBuffDebuffU:GetTimeText(true, value) or 'Off'
+			self.valText:SetText(flip)
+		else
+			self.valText:SetText(format('%.1f', value))
 			value = format('%.1f', value) --round it off
-			IBDU_DB.Opts["player"][self.iKey] = value
-			iBuffDebuffU:ModifyApperance_All()
+		end
+		if not self.onShow then
+			IBDU_DB.Opts["player"][self.iKey] = tonumber(value)
+			if self.tFunc and self.tFunc >= 1 then
+				iBuffDebuffU:UNIT_AURA('UNIT_AURA', 'player')
+			else
+				iBuffDebuffU:ModifyApperance_All()
+			end
 		end
 	end)
 	
