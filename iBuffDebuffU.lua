@@ -430,8 +430,6 @@ function f:ProcessAuras(unit, sdTimer)
 	if unit == "target" and not IBDU_DB.Opts.showtargetBuffs then pass = false end
 	if unit == "focus" and not IBDU_DB.Opts.showfocusBuffs then pass = false end
 
-	--['limitTime'] = 0,
-		
 	if pass then
 		for i=1, 40 do
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
@@ -440,6 +438,15 @@ function f:ProcessAuras(unit, sdTimer)
 				local passNow = false
 				if unit == "player" then passNow = true end
 				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+				if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
+					--check for never-ending buffs
+					if duration < 1 then
+						passNow = false
+					elseif duration > IBDU_DB.Opts[unit].limitTime then
+						passNow = false
+					end
+				end
+				--if target and focus then check for unitcaster, if it's the player then allow
 				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
 				
 				if passNow then
@@ -482,6 +489,7 @@ function f:ProcessAuras(unit, sdTimer)
 				local passNow = false
 				if unit == "player" then passNow = true end
 				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalDebuffCount then passNow = false end
+				--if target and focus then check for unitcaster, if it's the player then allow
 				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
 				
 				if passNow then
@@ -543,6 +551,15 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local passNow = true
 		
 		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+		if IBDU_DB.Opts[unit].limitTime > 0 then
+			--check for never-ending buffs
+			if duration < 1 then
+				passNow = false
+			elseif duration > IBDU_DB.Opts[unit].limitTime then
+				passNow = false
+			end
+		end
+				
 		if passNow then
 			index = index + 1
 			bData[index] = {}
@@ -578,6 +595,15 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local passNow = true
 		
 		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+		if IBDU_DB.Opts[unit].limitTime > 0 then
+			--check for never-ending buffs
+			if duration < 1 then
+				passNow = false
+			elseif duration > IBDU_DB.Opts[unit].limitTime then
+				passNow = false
+			end
+		end
+		
 		if passNow then
 			index = index + 1
 			bData[index] = {}
