@@ -735,8 +735,7 @@ function f:DisplayAuras(unit, sdTimer, bData)
 			if sdTimer[i]:IsVisible() then sdTimer[i]:Hide() end
 		end
 	end
-	
-	print(unit..": "..(#sdTimer or 0))
+
 end
 
 function f:ClearBuffs(sdTimer)
