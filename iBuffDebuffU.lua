@@ -3,7 +3,6 @@
 local timersTarget = {}
 local timersPlayer = {}
 local timersFocus = {}
-local MAX_TIMERS = 15 --note this number changes automatically, you don't have to edit it
 local targetGUID = 0
 local focusGUID = 0
 local playerGUID = 0
@@ -81,16 +80,6 @@ function f:PLAYER_LOGIN()
 	f:CreateAnchor("IBDU_FocusAnchor", UIParent, "focus")
 	f:CreateAnchor("IBDU_PlayerAnchor", UIParent, "player")
 	
-	--create our timers, start off at max and then add more when necessary
-	for i=1, MAX_TIMERS do
-		timersTarget[i] = f:CreateTimers("target")
-		timersFocus[i] = f:CreateTimers("focus")
-		timersPlayer[i] = f:CreateTimers("player")
-	end
-	
-	--arrange our bars based on growth direction
-	f:ProcessGrowth_All()
-	
 	--process our stuff the moment we login
 	f:ProcessAuras("player", timersPlayer)
 
@@ -145,9 +134,6 @@ function f:PLAYER_LOGIN()
 	end
 	
 	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r [v|cFFDF2B2B"..ver.."|r] loaded: /ibdu")
-	
-	--do a bar apperance update one last time (corrects certain alpha levels)
-	f:ModifyApperance_All()
 	
 	f:UnregisterEvent("PLAYER_LOGIN")
 	f.PLAYER_LOGIN = nil
@@ -750,6 +736,7 @@ function f:DisplayAuras(unit, sdTimer, bData)
 		end
 	end
 	
+	print(unit..": "..(#sdTimer or 0))
 end
 
 function f:ClearBuffs(sdTimer)
