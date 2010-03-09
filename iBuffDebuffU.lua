@@ -273,8 +273,9 @@ local TimerOnUpdate = function(self, time)
 		if self.duration > 0 then
 			self:SetValue(beforeEnd)
 		else
-			--it's an aura or permenate buff, always set it to the max
-			self:SetValue(1)
+			--it's an aura or permenate buff, set it as a transparent value, do it doesn't get confused
+			--with other buffs
+			self:SetValue(0)
 		end
 		
 		--set the bar text, lets check the width first and fix it if necessary so that text doesn't overlap
@@ -674,7 +675,7 @@ function f:DisplayAuras(unit, sdTimer, bData)
 			if bData[i].duration > 0 then
 				sdTimer[i]:SetMinMaxValues(0, bData[i].duration)
 			else
-				--it's an aura or permenate buff
+				--it's an aura or permenate buff, put it from 0 to 1.
 				sdTimer[i]:SetMinMaxValues(0, 1)
 			end
 			
