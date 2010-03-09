@@ -93,10 +93,8 @@ function f:PLAYER_LOGIN()
 		TemporaryEnchantFrame.Show = BuffFrame.Show
 	end
 	
-	f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	f:RegisterEvent("PLAYER_TARGET_CHANGED")
-	f:RegisterEvent("PLAYER_FOCUS_CHANGED")
-	f:RegisterEvent("UNIT_AURA")
+	--register events appropriately
+	f:ToggleMod_ON_OFF()
 	
 	SLASH_IBUFFDEBUFFU1 = "/ibuffdebuffu"
 	SLASH_IBUFFDEBUFFU2 = "/ibdu"
@@ -113,11 +111,13 @@ function f:PLAYER_LOGIN()
 				return true
 			elseif c and c:lower() == L_IBDU_SLASHOPT3 then
 				IBDU_DB.Opts.enable = true
+				f:ToggleMod_ON_OFF()
 				f:ProcessAuras("player", timersPlayer)
 				DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r: [|cFF00CC00"..L_IBDU_SLASHOPT3.."|r]")
 				return true
 			elseif c and c:lower() == L_IBDU_SLASHOPT4 then
 				IBDU_DB.Opts.enable = false
+				f:ToggleMod_ON_OFF()
 				f:ClearBuffs(timersTarget)
 				f:ClearBuffs(timersFocus)
 				f:ClearBuffs(timersPlayer)
@@ -139,8 +139,21 @@ function f:PLAYER_LOGIN()
 	f.PLAYER_LOGIN = nil
 end
 
+function f:ToggleMod_ON_OFF()
+	if IBDU_DB.Opts.enable then
+		f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		f:RegisterEvent("PLAYER_TARGET_CHANGED")
+		f:RegisterEvent("PLAYER_FOCUS_CHANGED")
+		f:RegisterEvent("UNIT_AURA")
+	else
+		f:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		f:UnregisterEvent("PLAYER_TARGET_CHANGED")
+		f:UnregisterEvent("PLAYER_FOCUS_CHANGED")
+		f:UnregisterEvent("UNIT_AURA")
+	end
+end
+
 function f:UNIT_AURA(event, unit)
-	if not IBDU_DB.Opts.enable then return end
 	if not unit then return end
 	if unit == "target" and UnitGUID(unit) and UnitGUID(unit) == targetGUID then
 		f:ProcessAuras("target", timersTarget)
@@ -152,7 +165,6 @@ function f:UNIT_AURA(event, unit)
 end
 	
 function f:PLAYER_TARGET_CHANGED()
-	if not IBDU_DB.Opts.enable then return end
 	--check if were targetting ourself, if not then display
 	if UnitName("target") and UnitGUID("target") and UnitGUID("target") ~= playerGUID then
 		targetGUID = UnitGUID("target")
@@ -164,7 +176,6 @@ function f:PLAYER_TARGET_CHANGED()
 end
 
 function f:PLAYER_FOCUS_CHANGED()
-	if not IBDU_DB.Opts.enable then return end
 	--check to see if we made ourself the focus, if so then ignore it
 	if UnitName("focus") and UnitGUID("focus") and UnitGUID("focus") ~= playerGUID then
 		focusGUID = UnitGUID("focus")
@@ -176,7 +187,6 @@ function f:PLAYER_FOCUS_CHANGED()
 end
 
 function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, spellSchool, auraType, amount)
-    if not IBDU_DB.Opts.enable then return end
 	
 	if eventType == "UNIT_DIED" or eventType == "UNIT_DESTROYED" then
 		if dstGUID == targetGUID then
@@ -402,9 +412,7 @@ end
 -- Buff Functions --
 ----------------------
 
-function f:ProcessAuras(unit, sdTimer)
-	if not IBDU_DB.Opts.enable then return end
-	
+function f:ProcessAuras(unit, sdTimer)	
 	local bData = {}
 	local index = 0
 	local filter
@@ -622,7 +630,6 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 end
 
 function f:DisplayAuras(unit, sdTimer, bData)
-	if not IBDU_DB.Opts.enable then return end
 	
 	--sort by auratype then by exptime
     table.sort(bData, function(a, b) 
