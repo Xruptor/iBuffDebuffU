@@ -106,6 +106,15 @@ function OptionsPlayer:CreateTab1(parent)
 	end)
 	showPlayerD:SetPoint('TOP', showplayerB, 'BOTTOM', 0, -1)
 
+	--show player cast buffs only
+	local showPlayerCBO = self:CreateCheckButton(L_IBDU_OPT16, tabFrame)
+	showPlayerCBO:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.playerCastBuffOnly) end)
+	showPlayerCBO:SetScript('OnClick', function(self)
+		IBDU_DB.Opts.playerCastBuffOnly = self:GetChecked() or false
+		iBuffDebuffU:UNIT_AURA('UNIT_AURA', 'player')
+	end)
+	showPlayerCBO:SetPoint('TOP', showPlayerD, 'BOTTOM', 0, -1)
+	
 	--show player debuffs
 	local showPlayerDColor = self:CreateCheckButton(L_IBDU_OPT10, tabFrame)
 	showPlayerDColor:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts.playerDebuffColoring) end)
@@ -113,7 +122,8 @@ function OptionsPlayer:CreateTab1(parent)
 		IBDU_DB.Opts.playerDebuffColoring = self:GetChecked() or false
 		iBuffDebuffU:UNIT_AURA('UNIT_AURA', 'player')
 	end)
-	showPlayerDColor:SetPoint('TOP', showPlayerD, 'BOTTOM', 0, -1)
+	showPlayerDColor:SetPoint('TOP', showPlayerCBO, 'BOTTOM', 0, -1)
+	
 	
 	return tabFrame
 	

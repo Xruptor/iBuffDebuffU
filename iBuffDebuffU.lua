@@ -47,6 +47,7 @@ local defaults = {
 		["showfocusBuffs"] = true,
 		["showfocusDebuffs"] = true,
 		['playerDebuffColoring'] = false,
+		['playerCastBuffOnly'] = false,
 		["enable"] = true,
 		["player"] = barDefaults,
 		["target"] = barDefaults,
@@ -83,6 +84,9 @@ function f:PLAYER_LOGIN()
 	--process our stuff the moment we login
 	f:ProcessAuras("player", timersPlayer)
 
+	--register events appropriately
+	f:ToggleMod_ON_OFF()
+	
 	--hide blizzard debuffs if user selected it, to turn this back on a reload is required
 	if IBDU_DB.Opts.hideblizzbuffs then
 		BuffFrame:UnregisterAllEvents()
@@ -92,9 +96,6 @@ function f:PLAYER_LOGIN()
 		TemporaryEnchantFrame:Hide()
 		TemporaryEnchantFrame.Show = BuffFrame.Show
 	end
-	
-	--register events appropriately
-	f:ToggleMod_ON_OFF()
 	
 	SLASH_IBUFFDEBUFFU1 = "/ibuffdebuffu"
 	SLASH_IBUFFDEBUFFU2 = "/ibdu"
@@ -431,7 +432,13 @@ function f:ProcessAuras(unit, sdTimer)
 			if name then
 				
 				local passNow = false
-				if unit == "player" then passNow = true end
+				if unit == "player" then
+					if not IBDU_DB.Opts.playerCastBuffOnly then
+						passNow = true
+					elseif IBDU_DB.Opts.playerCastBuffOnly and unitCaster and unitCaster == "player" then
+						passNow = true
+					end
+				end
 				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
 				if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
 					--check for never-ending buffs
@@ -443,6 +450,7 @@ function f:ProcessAuras(unit, sdTimer)
 				end
 				--if target and focus then check for unitcaster, if it's the player then allow
 				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+				
 				
 				if passNow then
 					index = index + 1
@@ -486,6 +494,7 @@ function f:ProcessAuras(unit, sdTimer)
 				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalDebuffCount then passNow = false end
 				--if target and focus then check for unitcaster, if it's the player then allow
 				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+				
 				
 				if passNow then
 					index = index + 1

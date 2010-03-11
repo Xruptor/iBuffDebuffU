@@ -30,6 +30,7 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_OPT13 = "显示焦点 buff 条"
 	L_IBDU_OPT14 = "显示焦点 debuff 条"
 	L_IBDU_OPT15 = "过滤器"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "缩放"
 	L_IBDU_OPT_SLIDER2 = "宽"
@@ -77,6 +78,7 @@ elseif ( GetLocale() == "ruRU" )  then
 	L_IBDU_OPT13 = "Show focus buff bars"
 	L_IBDU_OPT14 = "Show focus debuff bars"
 	L_IBDU_OPT15 = "Filters"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -125,6 +127,7 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_OPT13 = "顯示焦點 buff 條"
 	L_IBDU_OPT14 = "顯示焦點 debuff 條"
 	L_IBDU_OPT15 = "過濾器"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "縮放"
 	L_IBDU_OPT_SLIDER2 = "寬"
@@ -172,6 +175,7 @@ elseif ( GetLocale() == "frFR" ) then
 	L_IBDU_OPT13 = "Show focus buff bars"
 	L_IBDU_OPT14 = "Show focus debuff bars"
 	L_IBDU_OPT15 = "Filters"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -219,6 +223,7 @@ elseif ( GetLocale() == "koKR" ) then
 	L_IBDU_OPT13 = "Show focus buff bars"
 	L_IBDU_OPT14 = "Show focus debuff bars"
 	L_IBDU_OPT15 = "Filters"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
@@ -266,6 +271,7 @@ else
 	L_IBDU_OPT13 = "Show focus buff bars"
 	L_IBDU_OPT14 = "Show focus debuff bars"
 	L_IBDU_OPT15 = "Filters"
+	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	
 	L_IBDU_OPT_SLIDER1 = "Scale"
 	L_IBDU_OPT_SLIDER2 = "Width"
