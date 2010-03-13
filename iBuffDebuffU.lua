@@ -413,36 +413,49 @@ end
 -- Buff Functions --
 ----------------------
 
-function f:PassChk(unit, index, unitCaster)
+function f:PassChk(auraType, unit, index, unitCaster)
 	local passNow = false
 	
-	--set true
-	if unit == "player" then
-		if not IBDU_DB.Opts.playerCastBuffOnly then
-			passNow = true
-		elseif IBDU_DB.Opts.playerCastBuffOnly and unitCaster and unitCaster == "player" then
-			passNow = true
-		end
-	end
+	if auraType == "buff" then
 	
-	--set false
-	if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
-	if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
-		--check for never-ending buffs
-		if duration < 1 then
-			passNow = false
-		elseif duration > IBDU_DB.Opts[unit].limitTime then
-			passNow = false
+		--set true
+		if unit == "player" then
+			if not IBDU_DB.Opts.playerCastBuffOnly then
+				passNow = true
+			elseif IBDU_DB.Opts.playerCastBuffOnly and unitCaster and unitCaster == "player" then
+				passNow = true
+			end
 		end
-	end
+		
+		--set false
+		if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+		if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
+			--check for never-ending buffs
+			if duration < 1 then
+				passNow = false
+			elseif duration > IBDU_DB.Opts[unit].limitTime then
+				passNow = false
+			end
+		end
+		
+		--if target and focus then check for unitcaster, if it's the player then allow
+		if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+		
+	elseif auraType == "debuff" then
 	
-	--if target and focus then check for unitcaster, if it's the player then allow
-	if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+		if unit == "player" then passNow = true end
+		if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalDebuffCount then passNow = false end
+		--if target and focus then check for unitcaster, if it's the player then allow
+		if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end	
+		
+	end
 	
 	return passNow
 end
 
-function f:ProcessAuras(unit, sdTimer)	
+function f:ProcessAuras(unit, sdTimer)
+	if not IBDU_DB.Opts.enable then return end
+	
 	local bData = {}
 	local index = 0
 	local filter
@@ -460,8 +473,8 @@ function f:ProcessAuras(unit, sdTimer)
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name then
 				
-				local passNow = f:PassChk(unit, index, unitCaster)
-				
+				local passNow = f:PassChk("buff", unit, index, unitCaster)
+
 				if passNow then
 					index = index + 1
 					bData[index] = {}
@@ -499,13 +512,8 @@ function f:ProcessAuras(unit, sdTimer)
 			local name, _, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name and unitCaster then
 				
-				local passNow = false
-				if unit == "player" then passNow = true end
-				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalDebuffCount then passNow = false end
-				--if target and focus then check for unitcaster, if it's the player then allow
-				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
-				
-				
+				local passNow = f:PassChk("debuff", unit, index, unitCaster)
+
 				if passNow then
 					index = index + 1
 					bData[index] = {}
@@ -563,7 +571,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_MAINHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
 		
-		local passNow = f:PassChk(unit, index, "player")
+		local passNow = f:PassChk("buff", unit, index, "player")
 				
 		if passNow then
 			index = index + 1
@@ -598,7 +606,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_SECONDHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
 		
-		local passNow = f:PassChk(unit, index, "player")
+		local passNow = f:PassChk("buff", unit, index, "player")
 		
 		if passNow then
 			index = index + 1
