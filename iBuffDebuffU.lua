@@ -413,44 +413,54 @@ end
 -- Buff Functions --
 ----------------------
 
+function f:PassChk(unit, index, unitCaster)
+	local passNow = false
+	
+	--set true
+	if unit == "player" then
+		if not IBDU_DB.Opts.playerCastBuffOnly then
+			passNow = true
+		elseif IBDU_DB.Opts.playerCastBuffOnly and unitCaster and unitCaster == "player" then
+			passNow = true
+		end
+	end
+	
+	--set false
+	if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
+	if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
+		--check for never-ending buffs
+		if duration < 1 then
+			passNow = false
+		elseif duration > IBDU_DB.Opts[unit].limitTime then
+			passNow = false
+		end
+	end
+	
+	--if target and focus then check for unitcaster, if it's the player then allow
+	if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
+	
+	return passNow
+end
+
 function f:ProcessAuras(unit, sdTimer)	
 	local bData = {}
 	local index = 0
 	local filter
-	local pass = true
-	local passD = true
+	local pass = false
+	local passD = false
 		
 	--BUFFS
 	filter = 'HELPFUL'
-	if unit == "player" and not IBDU_DB.Opts.showplayerBuffs then pass = false end
-	if unit == "target" and not IBDU_DB.Opts.showtargetBuffs then pass = false end
-	if unit == "focus" and not IBDU_DB.Opts.showfocusBuffs then pass = false end
+	if unit == "player" and IBDU_DB.Opts.showplayerBuffs then pass = true end
+	if unit == "target" and IBDU_DB.Opts.showtargetBuffs then pass = true end
+	if unit == "focus" and IBDU_DB.Opts.showfocusBuffs then pass = true end
 
 	if pass then
 		for i=1, 40 do
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name then
 				
-				local passNow = false
-				if unit == "player" then
-					if not IBDU_DB.Opts.playerCastBuffOnly then
-						passNow = true
-					elseif IBDU_DB.Opts.playerCastBuffOnly and unitCaster and unitCaster == "player" then
-						passNow = true
-					end
-				end
-				if unit == "player" and (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
-				if unit == "player" and IBDU_DB.Opts[unit].limitTime > 0 then
-					--check for never-ending buffs
-					if duration < 1 then
-						passNow = false
-					elseif duration > IBDU_DB.Opts[unit].limitTime then
-						passNow = false
-					end
-				end
-				--if target and focus then check for unitcaster, if it's the player then allow
-				if unit ~= "player" and unitCaster and unitCaster == "player" then passNow = true end
-				
+				local passNow = f:PassChk(unit, index, unitCaster)
 				
 				if passNow then
 					index = index + 1
@@ -480,9 +490,9 @@ function f:ProcessAuras(unit, sdTimer)
 	
 	--DEBUFFS
 	filter = 'HARMFUL'
-	if unit == "player" and not IBDU_DB.Opts.showplayerDebuffs then passD = false end
-	if unit == "target" and not IBDU_DB.Opts.showtargetDebuffs then passD = false end
-	if unit == "focus" and not IBDU_DB.Opts.showfocusDebuffs then passD = false end
+	if unit == "player" and IBDU_DB.Opts.showplayerDebuffs then passD = true end
+	if unit == "target" and IBDU_DB.Opts.showtargetDebuffs then passD = true end
+	if unit == "focus" and IBDU_DB.Opts.showfocusDebuffs then passD = true end
 
 	if passD then
 		for i=1, 40 do
@@ -552,17 +562,8 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local itemLink = GetInventoryItemLink('player', INVSLOT_MAINHAND)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_MAINHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
-		local passNow = true
 		
-		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
-		if IBDU_DB.Opts[unit].limitTime > 0 then
-			--check for never-ending buffs
-			if duration < 1 then
-				passNow = false
-			elseif duration > IBDU_DB.Opts[unit].limitTime then
-				passNow = false
-			end
-		end
+		local passNow = f:PassChk(unit, index, "player")
 				
 		if passNow then
 			index = index + 1
@@ -596,17 +597,8 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local itemLink = GetInventoryItemLink('player', INVSLOT_SECONDHAND)
 		local name =  GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_SECONDHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
-		local passNow = true
 		
-		if (index + 1) > IBDU_DB.Opts[unit].totalBuffCount then passNow = false end
-		if IBDU_DB.Opts[unit].limitTime > 0 then
-			--check for never-ending buffs
-			if duration < 1 then
-				passNow = false
-			elseif duration > IBDU_DB.Opts[unit].limitTime then
-				passNow = false
-			end
-		end
+		local passNow = f:PassChk(unit, index, "player")
 		
 		if passNow then
 			index = index + 1
