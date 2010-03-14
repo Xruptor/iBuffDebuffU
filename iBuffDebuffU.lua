@@ -1,4 +1,4 @@
---IBUFFDEBUFFU: Created by Xanthos
+--IBUFFDEBUFFU: Created by Xruptor
 
 local timersTarget = {}
 local timersPlayer = {}
@@ -76,6 +76,9 @@ function f:PLAYER_LOGIN()
 	
 	playerGUID = UnitGUID("player")
 	
+	--register events appropriately
+	f:ToggleMod_ON_OFF()
+	
 	--create our anchors
 	f:CreateAnchor("IBDU_TargetAnchor", UIParent, "target")
 	f:CreateAnchor("IBDU_FocusAnchor", UIParent, "focus")
@@ -84,9 +87,6 @@ function f:PLAYER_LOGIN()
 	--process our stuff the moment we login
 	f:ProcessAuras("player", timersPlayer)
 
-	--register events appropriately
-	f:ToggleMod_ON_OFF()
-	
 	--hide blizzard debuffs if user selected it, to turn this back on a reload is required
 	if IBDU_DB.Opts.hideblizzbuffs then
 		BuffFrame:UnregisterAllEvents()
@@ -199,13 +199,13 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, src
 			focusGUID = 0
 		end
     end
-	--ENCHANT_REMOVED
     if eventType == "ENCHANT_APPLIED" then
 		if dstGUID == playerGUID then
 			--reset our booleans
 			f.enhMH = nil
 			f.enhOH = nil
 		end
+		--ENCHANT_REMOVED
     end
 end
 
@@ -510,7 +510,7 @@ function f:ProcessAuras(unit, sdTimer)
 	if passD then
 		for i=1, 40 do
 			local name, _, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
-			if name and unitCaster then
+			if name then
 				
 				local passNow = f:PassChk("debuff", unit, index, unitCaster)
 
@@ -720,18 +720,13 @@ function f:DisplayAuras(unit, sdTimer, bData)
 			sdTimer[i].iconBorder:SetVertexColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha)
 			
 			--debuff coloring
-			if unit == "player" and IBDU_DB.Opts.playerDebuffColoring and bData[i].dType then
-				if DebuffTypeColor[bData[i].dType] then
-					local color = DebuffTypeColor[bData[i].dType]
-					sdTimer[i]:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
-					sdTimer[i].bg:SetStatusBarColor(color.r, color.g, color.b, (IBDU_DB.Opts[unit].alpha_bg) or 0)
-				else
-					sdTimer[i]:SetStatusBarColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha)
-					sdTimer[i].bg:SetStatusBarColor(color[1], color[2], color[3], (IBDU_DB.Opts[unit].alpha_bg) or 0)
-				end
+			if unit == "player" and IBDU_DB.Opts.playerDebuffColoring and bData[i].dType and DebuffTypeColor[bData[i].dType] then
+				local color = DebuffTypeColor[bData[i].dType]
+				sdTimer[i]:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
+				sdTimer[i].bg:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha_bg or 0)
 			else
 				sdTimer[i]:SetStatusBarColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha)
-				sdTimer[i].bg:SetStatusBarColor(color[1], color[2], color[3], (IBDU_DB.Opts[unit].alpha_bg) or 0)
+				sdTimer[i].bg:SetStatusBarColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha_bg or 0)
 			end
 			
 			--before we display make sure the clickables are set only for the player
