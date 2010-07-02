@@ -6,12 +6,21 @@ local timersFocus = {}
 local targetGUID = 0
 local focusGUID = 0
 local playerGUID = 0
+local timerCount = 0
 local UnitAura = _G.UnitAura
 local UnitIsUnit = _G.UnitIsUnit
 local UnitName = _G.UnitName
 
 local f = CreateFrame("frame","iBuffDebuffU",UIParent)
 f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
+
+f:SetScript("OnUpdate", function(self, elapsed)
+	timerCount = timerCount + elapsed
+	if timerCount > 0.1 then
+		self:SortBarsAll()
+		timerCount = 0
+	end
+end)
 
 ----------------------
 --      Enable      --
@@ -640,28 +649,11 @@ end
 
 function f:DisplayAuras(unit, sdTimer, bData)
 	
-	--sort by auratype then by exptime
-    table.sort(bData, function(a, b) 
-		if a.auraType > b.auraType then
-			return true;
-		elseif a.auraType == b.auraType then
-			if( a.duration < 1 and b.duration < 1 ) then
-				return a.spellName < b.spellName
-			elseif( a.duration < 1 ) then
-				return false
-			elseif( b.duration < 1 ) then
-				return true
-			end
-			return a.expTime < b.expTime
-		end
-	end)
-	
 	--if we need more timers then add them
 	if #sdTimer < #bData then
 		for x = (#sdTimer + 1), #bData do
 			sdTimer[x] = f:CreateTimers(unit)
 		end
-		f:ProcessGrowth(unit, sdTimer) --now rearrange them
 	end
 	
 	--add the information to the timers, turn off inactive ones
@@ -869,6 +861,36 @@ function f:ModifyApperance(unit, sdTimer)
 		
 	end
 	
+end
+
+function f:SortBars(unit, sdTimer)
+	--sort by auratype then by exptime (percent of bar rather then time remaining)
+    table.sort(sdTimer, function(a, b)
+		if not a.active then
+			return false;
+		elseif not b.active then
+			return true;
+		elseif a.auraType > b.auraType then
+			return true;
+		elseif a.auraType == b.auraType then
+			if( a.duration < 1 and b.duration < 1 ) then
+				return a.spellName < b.spellName;
+			elseif( a.duration < 1 ) then
+				return false;
+			elseif( b.duration < 1 ) then
+				return true;
+			end
+			return ((max(0, a.expTime - GetTime()) / a.duration) * 100) < ((max(0, b.expTime - GetTime()) / b.duration) * 100);
+		end
+	end)
+	
+	f:ProcessGrowth(unit, sdTimer) --now rearrange them
+end
+
+function f:SortBarsAll()
+	f:SortBars("target", timersTarget)
+	f:SortBars("focus", timersFocus)
+	f:SortBars("player", timersPlayer)
 end
 
 function f:SaveLayout(frame)
