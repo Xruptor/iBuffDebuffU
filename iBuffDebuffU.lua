@@ -10,6 +10,7 @@ local timerCount = 0
 local UnitAura = _G.UnitAura
 local UnitIsUnit = _G.UnitIsUnit
 local UnitName = _G.UnitName
+local gratuity = LibStub("LibGratuity-3.0")
 
 local f = CreateFrame("frame","iBuffDebuffU",UIParent)
 f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
@@ -143,7 +144,7 @@ function f:PLAYER_LOGIN()
 		DEFAULT_CHAT_FRAME:AddMessage(L_IBDU_SLASH4)
 	end
 	
-	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r [v|cFFDF2B2B"..ver.."|r] loaded: /ibdu")
+	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r [v|cFFDF2B2B"..ver.."|r] loaded:   /ibdu")
 	
 	f:UnregisterEvent("PLAYER_LOGIN")
 	f.PLAYER_LOGIN = nil
@@ -196,8 +197,8 @@ function f:PLAYER_FOCUS_CHANGED()
 	end
 end
 
-function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellID, spellName, spellSchool, auraType, amount)
-	
+function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellName, spellID, spellSchool, auraType, amount)
+
 	if eventType == "UNIT_DIED" or eventType == "UNIT_DESTROYED" then
 		if dstGUID == targetGUID then
 			f:ClearBuffs(timersTarget)
@@ -207,14 +208,6 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, src
 			f:ClearBuffs(timersFocus)
 			focusGUID = 0
 		end
-    end
-    if eventType == "ENCHANT_APPLIED" then
-		if dstGUID == playerGUID then
-			--reset our booleans
-			f.enhMH = nil
-			f.enhOH = nil
-		end
-		--ENCHANT_REMOVED
     end
 end
 
@@ -402,10 +395,10 @@ function f:CreateTimers(unit)
 				self:Hide()
 				CancelUnitBuff("player", self.auraID)
 			elseif self.enchant and self.spellId and self.auraType == "buff" then
-				self.active = false
-				self:Hide()
 				if self.spellId == 1 then f.enhMH = true end
 				if self.spellId == 2 then f.enhOH = true end
+				self.active = false
+				self:Hide()
 				CancelItemTempEnchantment(self.spellId)
 			end
 		end
@@ -422,7 +415,7 @@ end
 -- Buff Functions --
 ----------------------
 
-function f:PassChk(auraType, unit, index, unitCaster)
+function f:PassChk(auraType, unit, index, unitCaster, duration)
 	local passNow = false
 	
 	if auraType == "buff" then
@@ -482,7 +475,7 @@ function f:ProcessAuras(unit, sdTimer)
 			local name, rank, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name then
 				
-				local passNow = f:PassChk("buff", unit, index, unitCaster)
+				local passNow = f:PassChk("buff", unit, index, unitCaster, duration)
 
 				if passNow then
 					index = index + 1
@@ -521,7 +514,7 @@ function f:ProcessAuras(unit, sdTimer)
 			local name, _, icon, count, dType, duration, expTime, unitCaster, _, _, spellId = UnitAura(unit, i, filter)
 			if name then
 				
-				local passNow = f:PassChk("debuff", unit, index, unitCaster)
+				local passNow = f:PassChk("debuff", unit, index, unitCaster, duration)
 
 				if passNow then
 					index = index + 1
@@ -554,6 +547,9 @@ function f:ProcessAuras(unit, sdTimer)
 		local hasMHEnh, MHExpry, MHCharges, hasOHEnh, OHExpry, OHCharges = GetWeaponEnchantInfo()
 		if hasMHEnh or hasOHEnh then
 			f:ProcessEnchants(unit, sdTimer, bData, index)
+		else
+			f.enhMH = nil
+			f.enhOH = nil
 		end
 	end
 
@@ -569,7 +565,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 	--1 = Main Hand
 	--2 = Off Hand 
 	--will use spellID
-		
+
 	if ( hasMHEnh and not f.enhMH) then
 		local INVSLOT_MAINHAND = GetInventorySlotInfo("MainHandSlot")
 		local totalExp = MHExpry / 1000
@@ -577,10 +573,11 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local expTime = totalExp + GetTime()
 		
 		local itemLink = GetInventoryItemLink('player', INVSLOT_MAINHAND)
-		local name =  GetItemInfo(itemLink) or 'Unknown'
+		local mainHandName, mainHandRank = f:GetTempBuffName(INVSLOT_MAINHAND)
+		local name = mainHandName or GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_MAINHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
 		
-		local passNow = f:PassChk("buff", unit, index, "player")
+		local passNow = f:PassChk("buff", unit, index, "player", duration)
 				
 		if passNow then
 			index = index + 1
@@ -591,7 +588,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 			bData[index].id = unit
 			bData[index].auraID = INVSLOT_MAINHAND
 			bData[index].spellName = name
-			bData[index].rank = '*'
+			bData[index].rank = mainHandRank or '*'
 			bData[index].iconTex = icon
 			bData[index].stacks = MHCharges or 0
 			bData[index].duration = duration or 0
@@ -612,10 +609,11 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 		local expTime = totalExp + GetTime()
 		
 		local itemLink = GetInventoryItemLink('player', INVSLOT_SECONDHAND)
-		local name =  GetItemInfo(itemLink) or 'Unknown'
+		local offHandName, offHandRank = f:GetTempBuffName(INVSLOT_SECONDHAND)
+		local name = offHandName or GetItemInfo(itemLink) or 'Unknown'
 		local icon = GetInventoryItemTexture("player", INVSLOT_SECONDHAND) or "Interface\\Icons\\INV_Misc_QuestionMark"
 		
-		local passNow = f:PassChk("buff", unit, index, "player")
+		local passNow = f:PassChk("buff", unit, index, "player", duration)
 		
 		if passNow then
 			index = index + 1
@@ -626,7 +624,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 			bData[index].id = unit
 			bData[index].auraID = INVSLOT_SECONDHAND
 			bData[index].spellName = name
-			bData[index].rank = '*'
+			bData[index].rank = offHandRank or '*'
 			bData[index].iconTex = icon
 			bData[index].stacks = OHCharges or 0
 			bData[index].duration = duration or 0
@@ -639,10 +637,7 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 			bData[index].active = true
 		end
 	end
-
-	--this is to prevent the enchant from being displayed again, there is a delay between UNIT_AURA
-	--and the data returned by GetWeaponEnchantInfo.  So sometimes the enchant gets displayed again during the delay.
-	--the only way to combat this, is to put a boolean when a user manually removes an enchant
+	
 	f.enhMH = nil
 	f.enhOH = nil
 end
@@ -755,6 +750,49 @@ end
 ----------------------
 -- Local Functions  --
 ----------------------
+
+local roman_to_arabic = setmetatable({I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000}, {__index=function(self, roman)
+	local arabic = 0
+	local maxval = 0
+	for i = roman:len(), 1, -1 do
+		local digitval = self[roman:sub(i,i)]
+		if digitval < maxval then
+			arabic = arabic - digitval
+		else
+			arabic = arabic + digitval
+			maxval = digitval
+		end
+	end
+	self[roman] = arabic
+	return arabic
+end})
+
+function f:GetTempBuffName(slot)
+	local rank
+	gratuity:SetInventoryItem("player", slot)
+	local _, _, buffname = gratuity:Find("^(.+) %(%d+ [^%)]+%)$")
+	if buffname then
+		buffname = string.gsub(buffname, " %(%d+ [^%)]+%)", "") -- remove 2nd brackets for buffs with charges
+		local tname, trank = strmatch(buffname, "(.*) (%d*)$")
+		if tname then
+			buffname = tname
+			rank = trank
+		else
+			local tname, trank = strmatch(buffname, "(.*) ([CDILMVX]*)$")
+			if tname then
+				buffname = tname
+				rank = roman_to_arabic[trank]
+			end
+		end
+		return buffname, rank
+	end
+	local itemlink = GetInventoryItemLink("player", slot)
+	if itemlink then
+		local name = GetItemInfo(itemlink)
+		return name or "Weapon "..slot
+	end
+	return "Weapon "..slot
+end
 
 function f:ToggleAnchors(frame)
 
