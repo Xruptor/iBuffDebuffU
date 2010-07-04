@@ -2,7 +2,7 @@
 ## Title: iBuffDebuffU
 ## Notes: Displays Buffs/Debuffs on your current target/focus and the player.
 ## Author: Xruptor
-## Version:  1.9.1
+## Version:  2.0
 ## X-Website: http://xruptor.wowinterface.com
 ## X-Email: Private Message (PM) me at WowInterface.com
 ## X-Category: Buff/Debuff

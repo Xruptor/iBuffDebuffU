@@ -274,7 +274,7 @@ end
 local TimerOnUpdate = function(self, time)
 
 	if self.active then
-		local beforeEnd = self.expTime - GetTime()
+		local beforeEnd = (self.expTime or 0) - GetTime()
 
 		if self.duration > 0 and beforeEnd <= 0 then
 			self.active = false
@@ -553,8 +553,8 @@ function f:ProcessAuras(unit, sdTimer)
 		end
 	end
 
-	--display the auras
-	f:DisplayAuras(unit, sdTimer, bData)
+	--load our data into aura bars
+	f:LoadAuraBars(unit, sdTimer, bData)
 end
 
 function f:ProcessEnchants(unit, sdTimer, bData, index)
@@ -642,14 +642,39 @@ function f:ProcessEnchants(unit, sdTimer, bData, index)
 	f.enhOH = nil
 end
 
-function f:DisplayAuras(unit, sdTimer, bData)
+function f:LoadAuraBars(unit, sdTimer, bData)
+	--boolean to prevent errors in sorting
+	f.LoadingBars = true
 	
 	--if we need more timers then add them
 	if #sdTimer < #bData then
 		for x = (#sdTimer + 1), #bData do
 			sdTimer[x] = f:CreateTimers(unit)
 		end
+	elseif #sdTimer > #bData then
+		--remove bars in reverse
+		for i = #sdTimer, (#bData + 1), -1 do
+			if sdTimer[i] then
+				sdTimer[i].active = false
+				sdTimer[i]:Hide()
+				table.remove(sdTimer, i)
+			end
+		end
 	end
+
+	--sort by auratype then by exptime (percent of bar rather then time remaining)
+    table.sort(bData, function(a, b)
+		if a.auraType > b.auraType then
+			return true;
+		elseif a.auraType == b.auraType then
+			if( a.duration < 1 and b.duration < 1 ) then
+				return a.spellName < b.spellName;
+			elseif( b.duration < 1 ) then
+				return true;
+			end
+			return ((max(0, a.expTime - GetTime()) / a.duration) * 100) < ((max(0, b.expTime - GetTime()) / b.duration) * 100);
+		end
+	end)
 	
 	--add the information to the timers, turn off inactive ones
 	for i=1, #sdTimer do
@@ -724,17 +749,11 @@ function f:DisplayAuras(unit, sdTimer, bData)
 				sdTimer[i]:EnableMouse(false)
 				sdTimer[i].bg:EnableMouse(false)
 			end
-			
 			if not sdTimer[i]:IsVisible() then sdTimer[i]:Show() end
-		else
-			sdTimer[i].active = false
-			sdTimer[i].text:SetText('')
-			sdTimer[i].timer:SetText('')
-			sdTimer[i].icon:SetTexture(nil)
-			if sdTimer[i]:IsVisible() then sdTimer[i]:Hide() end
 		end
 	end
-
+	
+	f.LoadingBars = nil
 end
 
 function f:ClearBuffs(sdTimer)
@@ -902,19 +921,15 @@ function f:ModifyApperance(unit, sdTimer)
 end
 
 function f:SortBars(unit, sdTimer)
+	if f.LoadingBars then return end
+	
 	--sort by auratype then by exptime (percent of bar rather then time remaining)
     table.sort(sdTimer, function(a, b)
-		if not a.active then
-			return false;
-		elseif not b.active then
-			return true;
-		elseif a.auraType > b.auraType then
+		if a.auraType > b.auraType then
 			return true;
 		elseif a.auraType == b.auraType then
 			if( a.duration < 1 and b.duration < 1 ) then
 				return a.spellName < b.spellName;
-			elseif( a.duration < 1 ) then
-				return false;
 			elseif( b.duration < 1 ) then
 				return true;
 			end
