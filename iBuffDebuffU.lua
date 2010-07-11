@@ -62,9 +62,15 @@ local defaults = {
 		["player"] = barDefaults,
 		["target"] = barDefaults,
 		["focus"] = barDefaults,
+		["playerBuffColor"] = {r=0, g=183/255, b=239/255},
+		["playerDebuffColor"] = {r=1, g=0, b=0},
+		["targetBuffColor"] = {r=0, g=1, b=0},
+		["targetDebuffColor"] = {r=1, g=0, b=0},
+		["focusBuffColor"] = {r=0, g=1, b=0},
+		["focusDebuffColor"] = {r=1, g=0, b=0},
 	},
 }
-
+	
 function f:PLAYER_LOGIN()
 	
 	local ver = tonumber(GetAddOnMetadata("iBuffDebuffU","Version")) or 'Unknown'
@@ -712,34 +718,20 @@ function f:LoadAuraBars(unit, sdTimer, bData)
 			sdTimer[i].timer:SetText(f:GetTimeText(unit, bData[i].duration))
 
 			local color = {}
-
-			if unit == "target" or unit == "focus" then
-				if bData[i].auraType == "buff" then
-					color = {0,255,0}
-				else
-					color = {255,0,0}
-				end
-			elseif unit == "player" then
-				if bData[i].auraType == "buff" then
-					color = {0,183/255,239/255}
-				else
-					color = {255,0,0}
-				end
+			if unit == "player" and IBDU_DB.Opts.playerDebuffColoring and bData[i].dType and DebuffTypeColor[bData[i].dType] and bData[i].auraType == "debuff" then
+				color = DebuffTypeColor[bData[i].dType]
+			elseif bData[i].auraType == "buff" then
+				color = IBDU_DB.Opts[unit.."BuffColor"]
+			else
+				color = IBDU_DB.Opts[unit.."DebuffColor"]
 			end
-	
+
 			sdTimer[i].icon:SetTexture(bData[i].iconTex)
 			sdTimer[i].icon:SetVertexColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
-			sdTimer[i].iconBorder:SetVertexColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha)
-			
-			--debuff coloring
-			if unit == "player" and IBDU_DB.Opts.playerDebuffColoring and bData[i].dType and DebuffTypeColor[bData[i].dType] then
-				local color = DebuffTypeColor[bData[i].dType]
-				sdTimer[i]:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
-				sdTimer[i].bg:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha_bg or 0)
-			else
-				sdTimer[i]:SetStatusBarColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha)
-				sdTimer[i].bg:SetStatusBarColor(color[1], color[2], color[3], IBDU_DB.Opts[unit].alpha_bg or 0)
-			end
+			sdTimer[i].iconBorder:SetVertexColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
+
+			sdTimer[i]:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
+			sdTimer[i].bg:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha_bg or 0)
 			
 			--before we display make sure the clickables are set only for the player
 			if unit == "player" then
