@@ -11,6 +11,7 @@ local UnitAura = _G.UnitAura
 local UnitIsUnit = _G.UnitIsUnit
 local UnitName = _G.UnitName
 local gratuity = LibStub("LibGratuity-3.0")
+local sharedMedia = LibStub("LibSharedMedia-3.0")
 
 local f = CreateFrame("frame","iBuffDebuffU",UIParent)
 f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
@@ -32,7 +33,7 @@ local barDefaults = {
 		["grow"] = true,
 		["width"] = 200,
 		["height"] = 16,
-		["font"] = "Fonts\\FRIZQT__.TTF",
+		["font"] = "Friz Quadrata TT",
 		["fontSize"] = 12,
 		["alpha"] = 1,
 		["alpha_bg"] = 0.5,
@@ -68,6 +69,7 @@ local defaults = {
 		["targetDebuffColor"] = {r=1, g=0, b=0},
 		["focusBuffColor"] = {r=0, g=1, b=0},
 		["focusDebuffColor"] = {r=1, g=0, b=0},
+		["barTexture"] = "Minimalist",
 	},
 }
 	
@@ -94,6 +96,10 @@ function f:PLAYER_LOGIN()
 	
 	--register events appropriately
 	f:ToggleMod_ON_OFF()
+	
+	--do SharedMedia Stuff
+	sharedMedia:Register(sharedMedia.MediaType.STATUSBAR, "Minimalist", "Interface\\Addons\\iBuffDebuffU\\media\\Minimalist")
+	sharedMedia.RegisterCallback(f, "LibSharedMedia_Registered", "SharedMediaRegister")
 	
 	--create our anchors
 	f:CreateAnchor("IBDU_TargetAnchor", UIParent, "target")
@@ -154,6 +160,12 @@ function f:PLAYER_LOGIN()
 	
 	f:UnregisterEvent("PLAYER_LOGIN")
 	f.PLAYER_LOGIN = nil
+end
+
+function f:SharedMediaRegister(event, mediaType, key)
+	if( mediaType == sharedMedia.MediaType.STATUSBAR or mediaType == sharedMedia.MediaType.FONT ) then
+		--update the dropdown for newly registered media types
+	end
 end
 
 function f:ToggleMod_ON_OFF()
@@ -311,12 +323,15 @@ end
 
 function f:CreateTimers(unit)
 	
+	local textureSML = sharedMedia:Fetch(SML.MediaType.STATUSBAR, IBDU_DB.Opts.barTexture)
+	local fontSML = sharedMedia:Fetch(SML.MediaType.FONT, IBDU_DB.Opts[unit].font)
+	
 	local Frm = CreateFrame("StatusBar", nil, UIParent)
 	Frm:SetClampedToScreen(true)
 	Frm:SetMovable(false)
 	Frm:SetWidth(IBDU_DB.Opts[unit].width)
 	Frm:SetHeight(IBDU_DB.Opts[unit].height)
-	Frm:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\statusbar")
+	Frm:SetStatusBarTexture(textureSML)
 	Frm:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
 	Frm:SetAlpha(IBDU_DB.Opts[unit].alpha)
 	Frm:EnableMouse(true)
@@ -326,7 +341,7 @@ function f:CreateTimers(unit)
 	Frm.bg:SetValue(1)
 	Frm.bg:SetAllPoints(Frm)
 	Frm.bg:SetFrameLevel(0)
-	Frm.bg:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\statusbar")
+	Frm.bg:SetStatusBarTexture(textureSML)
 	Frm.bg:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha_bg)
 	Frm.bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
 	Frm.bg:EnableMouse(true)
@@ -353,7 +368,7 @@ function f:CreateTimers(unit)
 	Frm.text:SetPoint("TOPLEFT", Frm, "TOPLEFT", 2, 0)
 	Frm.text:SetHeight(IBDU_DB.Opts[unit].height)
 	Frm.text:SetWidth(IBDU_DB.Opts[unit].width)
-	Frm.text:SetFont(IBDU_DB.Opts[unit].font, IBDU_DB.Opts[unit].fontSize)
+	Frm.text:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
 	Frm.text:SetShadowOffset(1, -1)
 	Frm.text:SetShadowColor(0, 0, 0, 1)
 	Frm.text:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
@@ -364,7 +379,7 @@ function f:CreateTimers(unit)
 	Frm.timer:SetJustifyV("CENTER")
 	Frm.timer:SetPoint("TOPRIGHT", Frm, "TOPRIGHT", -1, 0)
 	Frm.timer:SetHeight(IBDU_DB.Opts[unit].height)
-	Frm.timer:SetFont(IBDU_DB.Opts[unit].font, IBDU_DB.Opts[unit].fontSize)
+	Frm.timer:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
 	Frm.timer:SetShadowOffset(1, -1)
 	Frm.timer:SetShadowColor(0, 0, 0, 1)
 	Frm.timer:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
@@ -870,16 +885,21 @@ function f:ModifyApperance_All()
 end
 
 function f:ModifyApperance(unit, sdTimer)
-
+	
+	local textureSML = sharedMedia:Fetch(SML.MediaType.STATUSBAR, IBDU_DB.Opts.barTexture)
+	local fontSML = sharedMedia:Fetch(SML.MediaType.FONT, IBDU_DB.Opts[unit].font)
+	
 	for i=1, #sdTimer do
 		
 		--set normal bars
 		sdTimer[i]:SetWidth(IBDU_DB.Opts[unit].width)
 		sdTimer[i]:SetHeight(IBDU_DB.Opts[unit].height)
 		sdTimer[i]:SetAlpha(IBDU_DB.Opts[unit].alpha)
+		sdTimer[i]:SetStatusBarTexture(textureSML)
 		
 		--set bg alpha
 		sdTimer[i].bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
+		sdTimer[i].bg:SetStatusBarTexture(textureSML)
 		
 		--icon
 		sdTimer[i].icon:ClearAllPoints()
@@ -896,14 +916,14 @@ function f:ModifyApperance(unit, sdTimer)
 		sdTimer[i].text:SetPoint("TOPLEFT", sdTimer[i], "TOPLEFT", 2, 0)
 		sdTimer[i].text:SetHeight(IBDU_DB.Opts[unit].height)
 		sdTimer[i].text:SetWidth(IBDU_DB.Opts[unit].width)
-		sdTimer[i].text:SetFont(IBDU_DB.Opts[unit].font, IBDU_DB.Opts[unit].fontSize)
+		sdTimer[i].text:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
 		sdTimer[i].text:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
 		
 		--timer
 		sdTimer[i].timer:ClearAllPoints()
 		sdTimer[i].timer:SetPoint("TOPRIGHT", sdTimer[i], "TOPRIGHT", -1, 0)
 		sdTimer[i].timer:SetHeight(IBDU_DB.Opts[unit].height)
-		sdTimer[i].timer:SetFont(IBDU_DB.Opts[unit].font, IBDU_DB.Opts[unit].fontSize)
+		sdTimer[i].timer:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
 		sdTimer[i].timer:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
 		
 		sdTimer[i]:SetScale(tonumber(IBDU_DB.Opts[unit].scale))

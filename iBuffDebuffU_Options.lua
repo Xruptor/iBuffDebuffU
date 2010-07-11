@@ -40,6 +40,11 @@ function Options:AddDisplayPanel()
 	end)
 	hideBlizzBuff:SetPoint('TOPLEFT', 10, -50)
 	
+	--do the texture dropdown
+	local dropDown = Options:CreateDropDownButton("Default", L_IBDU_OPT18, self, 1)
+	dropDown:SetPoint('TOPLEFT', 10, -100)
+	dropDown:SetScript('OnShow', function(self) self.text:SetText(IBDU_DB.Opts.barTexture) end)
+	
 end
 
 --[[
@@ -257,6 +262,58 @@ function Options:CreateCheckButton(name, parent)
 	local button = CreateFrame('CheckButton', parent:GetName() .. name, parent, 'InterfaceOptionsCheckButtonTemplate')
 	getglobal(button:GetName() .. 'Text'):SetText(name)
 
+	return button
+end
+
+--dropdown button
+function Options:CreateDropDownButton(name, header, parent, numDD)
+
+	local button = CreateFrame("Frame", parent:GetName().."DropDown"..(numDD or 1), parent)
+	button:SetHeight(26)
+	button:SetWidth(160)
+	button:SetAlpha(1)
+	button:SetBackdrop({
+			bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+			tile = true,
+			tileSize = 16,
+			edgeSize = 16,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 }
+	})
+	button:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b)
+	button:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b)
+			
+	local text = button:CreateFontString(nil, "ARTWORK")
+	text:SetFontObject(GameFontHighlightSmall)
+	text:SetPoint("LEFT", button, "LEFT", 7, 0)
+	text:SetWidth(button:GetWidth() - 35)
+	text:SetText(name)
+	text:SetJustifyH("LEFT")
+	button.text = text
+	
+	local textHeader = button:CreateFontString(nil, "ARTWORK")
+	textHeader:SetFontObject(GameFontNormal)
+	textHeader:SetPoint("LEFT", button, "LEFT", 7, button:GetHeight() - 5)
+	textHeader:SetText(header)
+	textHeader:SetJustifyH("LEFT")
+	button.header = textHeader
+	
+	local arrow = CreateFrame("Button", button:GetName().."Arrow", button)
+	arrow:SetPoint("LEFT", button, "RIGHT", -25, 0)
+	arrow:SetWidth(24)
+	arrow:SetHeight(24)
+	arrow:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up")
+	arrow:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Down")
+	arrow:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Disabled")
+	arrow:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight","ADD")
+	arrow:SetScript("OnClick", function(self, button)
+		self:GetParent():GetScript("OnMouseDown")(self:GetParent(), button)
+	end)
+	button.arrow = arrow
+
+	button:EnableMouse(true)
+	button:SetScript("OnMouseDown", function(self, button) end)
+	
 	return button
 end
 

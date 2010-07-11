@@ -32,6 +32,7 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_OPT15 = "过滤器"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
@@ -88,6 +89,7 @@ elseif ( GetLocale() == "ruRU" )  then
 	L_IBDU_OPT15 = "Filters"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
@@ -145,6 +147,7 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_OPT15 = "過濾器"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
@@ -201,6 +204,7 @@ elseif ( GetLocale() == "frFR" ) then
 	L_IBDU_OPT15 = "Filters"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
@@ -257,6 +261,7 @@ elseif ( GetLocale() == "koKR" ) then
 	L_IBDU_OPT15 = "Filters"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
@@ -313,6 +318,7 @@ else
 	L_IBDU_OPT15 = "Filters"
 	L_IBDU_OPT16 = "Show only the buffs cast by the player."
 	L_IBDU_OPT17 = "Buff/Debuff Colors"
+	L_IBDU_OPT18 = "Set Bar Texture"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"
