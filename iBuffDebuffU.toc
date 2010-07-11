@@ -12,6 +12,7 @@ lib\LibStub.lua
 lib\CallbackHandler-1.0.lua
 lib\LibSharedMedia-3.0.lua
 lib\LibGratuity-3.0.lua
+lib\LibXMenu-1.0.lua
 lib\tekKonfigAboutPanel.lua
 lib\tekKonfigTopTab.lua
 localization\localization.lua

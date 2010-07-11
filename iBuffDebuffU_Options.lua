@@ -41,9 +41,9 @@ function Options:AddDisplayPanel()
 	hideBlizzBuff:SetPoint('TOPLEFT', 10, -50)
 	
 	--do the texture dropdown
-	local dropDown = Options:CreateDropDownButton("Default", L_IBDU_OPT18, self, 1)
+	local dropDown = Options:CreateDropDownButton(L_IBDU_OPT23, L_IBDU_OPT18, self, 1)
 	dropDown:SetPoint('TOPLEFT', 10, -100)
-	dropDown:SetScript('OnShow', function(self) self.text:SetText(IBDU_DB.Opts.barTexture) end)
+	dropDown:SetScript("OnMouseDown", function(self, button)  ToggleDropDownMenu(1, nil, iBuffDebuffU.DD, self, 0, 0) end)
 	
 end
 

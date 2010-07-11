@@ -33,7 +33,6 @@ local barDefaults = {
 		["grow"] = true,
 		["width"] = 200,
 		["height"] = 16,
-		["font"] = "Friz Quadrata TT",
 		["fontSize"] = 12,
 		["alpha"] = 1,
 		["alpha_bg"] = 0.5,
@@ -69,7 +68,8 @@ local defaults = {
 		["targetDebuffColor"] = {r=1, g=0, b=0},
 		["focusBuffColor"] = {r=0, g=1, b=0},
 		["focusDebuffColor"] = {r=1, g=0, b=0},
-		["barTexture"] = "Minimalist",
+		["statusbar"] = "Minimalist",
+		["font"] = "Friz Quadrata TT",
 	},
 }
 	
@@ -91,15 +91,18 @@ function f:PLAYER_LOGIN()
 			end
 		end
 	end
+	--fix a stupid old font glitch from previous versions
+	if IBDU_DB.Opts.font == "Fonts\\FRIZQT__.TTF" then IBDU_DB.Opts.font = "Friz Quadrata TT" end
 	
 	playerGUID = UnitGUID("player")
 	
 	--register events appropriately
 	f:ToggleMod_ON_OFF()
 	
-	--do SharedMedia Stuff
+	--do SharedMedia Stuff and setup the dropdown
 	sharedMedia:Register(sharedMedia.MediaType.STATUSBAR, "Minimalist", "Interface\\Addons\\iBuffDebuffU\\media\\Minimalist")
 	sharedMedia.RegisterCallback(f, "LibSharedMedia_Registered", "SharedMediaRegister")
+	f:SetupDropDown()
 	
 	--create our anchors
 	f:CreateAnchor("IBDU_TargetAnchor", UIParent, "target")
@@ -162,12 +165,6 @@ function f:PLAYER_LOGIN()
 	f.PLAYER_LOGIN = nil
 end
 
-function f:SharedMediaRegister(event, mediaType, key)
-	if( mediaType == sharedMedia.MediaType.STATUSBAR or mediaType == sharedMedia.MediaType.FONT ) then
-		--update the dropdown for newly registered media types
-	end
-end
-
 function f:ToggleMod_ON_OFF()
 	if IBDU_DB.Opts.enable then
 		f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -227,6 +224,53 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, eventType, srcGUID, src
 			focusGUID = 0
 		end
     end
+end
+
+----------------------
+-- DropDown Creation -
+----------------------
+
+function f:SharedMediaRegister(event, mediaType, key)
+	if( mediaType == sharedMedia.MediaType.STATUSBAR or mediaType == sharedMedia.MediaType.FONT ) then
+		--update the dropdown for newly registered media types
+		f:SetupDropDown()
+	end
+end
+
+function f:SetupDropDown()
+
+	--close the dropdown menu if shown
+	if f.DD and f.DD:IsShown() then
+		CloseDropDownMenus()
+	end
+
+	local dd1 = LibStub('LibXMenu-1.0'):New("iBuffDebuffU_DD", IBDU_DB.Opts)
+	dd1.initialize = function(self, lvl)
+		if lvl == 1 then
+			self:AddList(lvl, L_IBDU_OPT19, "font")
+			self:AddList(lvl, L_IBDU_OPT20, "statusbar")
+			self:AddCloseButton(lvl,  L_IBDU_OPT21)
+		elseif lvl and lvl > 1 then
+			local sub = UIDROPDOWNMENU_MENU_VALUE
+			if sub == sharedMedia.MediaType.STATUSBAR or sub == sharedMedia.MediaType.FONT then
+				local t = sharedMedia:List(sub)
+				local starti = 20 * (lvl - 2) + 1
+				local endi = 20 * (lvl - 1)
+				for i = starti, endi, 1 do
+					if not t[i] then break end
+					self:AddSelect(lvl, t[i], t[i], sub)
+					if i == endi and t[i + 1] then
+						self:AddList(lvl, L_IBDU_OPT22, sub)
+					end	
+				end
+			end	
+		end
+	end
+	dd1.doUpdate = function(bOpt)
+		f:ModifyApperance_All()
+	end
+	
+	f.DD = dd1
 end
 
 ----------------------
@@ -323,8 +367,8 @@ end
 
 function f:CreateTimers(unit)
 	
-	local textureSML = sharedMedia:Fetch(SML.MediaType.STATUSBAR, IBDU_DB.Opts.barTexture)
-	local fontSML = sharedMedia:Fetch(SML.MediaType.FONT, IBDU_DB.Opts[unit].font)
+	local textureSML = sharedMedia:Fetch(sharedMedia.MediaType.STATUSBAR, IBDU_DB.Opts.statusbar)
+	local fontSML = sharedMedia:Fetch(sharedMedia.MediaType.FONT, IBDU_DB.Opts.font)
 	
 	local Frm = CreateFrame("StatusBar", nil, UIParent)
 	Frm:SetClampedToScreen(true)
@@ -886,8 +930,8 @@ end
 
 function f:ModifyApperance(unit, sdTimer)
 	
-	local textureSML = sharedMedia:Fetch(SML.MediaType.STATUSBAR, IBDU_DB.Opts.barTexture)
-	local fontSML = sharedMedia:Fetch(SML.MediaType.FONT, IBDU_DB.Opts[unit].font)
+	local textureSML = sharedMedia:Fetch(sharedMedia.MediaType.STATUSBAR, IBDU_DB.Opts.statusbar)
+	local fontSML = sharedMedia:Fetch(sharedMedia.MediaType.FONT, IBDU_DB.Opts.font)
 	
 	for i=1, #sdTimer do
 		
