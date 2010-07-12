@@ -935,21 +935,33 @@ function f:ModifyApperance(unit, sdTimer)
 	
 	for i=1, #sdTimer do
 		
+		local color = {}
+		if unit == "player" and IBDU_DB.Opts.playerDebuffColoring and sdTimer[i].dType and DebuffTypeColor[sdTimer[i].dType] and sdTimer[i].auraType == "debuff" then
+			color = DebuffTypeColor[sdTimer[i].dType]
+		elseif sdTimer[i].auraType == "buff" then
+			color = IBDU_DB.Opts[unit.."BuffColor"]
+		else
+			color = IBDU_DB.Opts[unit.."DebuffColor"]
+		end
+
 		--set normal bars
 		sdTimer[i]:SetWidth(IBDU_DB.Opts[unit].width)
 		sdTimer[i]:SetHeight(IBDU_DB.Opts[unit].height)
 		sdTimer[i]:SetAlpha(IBDU_DB.Opts[unit].alpha)
 		sdTimer[i]:SetStatusBarTexture(textureSML)
+		sdTimer[i]:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
 		
 		--set bg alpha
 		sdTimer[i].bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
 		sdTimer[i].bg:SetStatusBarTexture(textureSML)
+		sdTimer[i].bg:SetStatusBarColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha_bg or 0)
 		
 		--icon
 		sdTimer[i].icon:ClearAllPoints()
 		sdTimer[i].icon:SetPoint("TOPLEFT", sdTimer[i], "TOPLEFT", -IBDU_DB.Opts[unit].height, 0)
 		sdTimer[i].icon:SetHeight(IBDU_DB.Opts[unit].height)
 		sdTimer[i].icon:SetWidth(IBDU_DB.Opts[unit].height)
+		sdTimer[i].iconBorder:SetVertexColor(color.r, color.g, color.b, IBDU_DB.Opts[unit].alpha)
 		
 		sdTimer[i].iconBorder:ClearAllPoints()
 		sdTimer[i].iconBorder:SetPoint("TOPLEFT", sdTimer[i].icon)

@@ -194,6 +194,7 @@ function OptionsPlayer:CreateTab2(parent)
 			local sf = IBDU_DB.Opts[colorUnit.."BuffColor"]
 			sf.r, sf.g, sf.b = r, g, b
 		end
+		iBuffDebuffU:ModifyApperance_All()
 	end
 	color1.GetColor = function(self)
 		if IBDU_DB.Opts[colorUnit.."BuffColor"] then
@@ -213,6 +214,7 @@ function OptionsPlayer:CreateTab2(parent)
 			local sf = IBDU_DB.Opts[colorUnit.."DebuffColor"]
 			sf.r, sf.g, sf.b = r, g, b
 		end
+		iBuffDebuffU:ModifyApperance_All()
 	end
 	color2.GetColor = function(self)
 		if IBDU_DB.Opts[colorUnit.."DebuffColor"] then
