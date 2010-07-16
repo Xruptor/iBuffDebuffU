@@ -254,13 +254,14 @@ function f:SetupDropDown()
 			local sub = UIDROPDOWNMENU_MENU_VALUE
 			if sub == sharedMedia.MediaType.STATUSBAR or sub == sharedMedia.MediaType.FONT then
 				local t = sharedMedia:List(sub)
-				local starti = (UIDROPDOWNMENU_MAXBUTTONS * (lvl - 2)) + 1
-				local endi = (UIDROPDOWNMENU_MAXBUTTONS * (lvl - 1))
+				local starti = (20 * (lvl - 2)) + 1
+				local endi = (20 * (lvl - 1)) - 1
 				for i = starti, endi, 1 do
 					if not t[i] then break end
 					self:AddSelect(lvl, t[i], t[i], sub)
 					if i == endi and t[i + 1] then
 						self:AddList(lvl, L_IBDU_OPT22, sub)
+						break
 					end	
 				end
 			end	
