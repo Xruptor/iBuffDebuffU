@@ -38,6 +38,7 @@ if ( GetLocale() == "zhCN" ) then
 	L_IBDU_OPT21 = "关闭"
 	L_IBDU_OPT22 = "更多"
 	L_IBDU_OPT23 = "点击来设置"
+	L_IBDU_OPT24 = "Show spell icon"
 	
 	L_IBDU_OPT_COLOR1 = "玩家 Buff 颜色"
 	L_IBDU_OPT_COLOR2 = "玩家 Debuff 颜色"
@@ -101,6 +102,7 @@ elseif ( GetLocale() == "zhTW" ) then
 	L_IBDU_OPT21 = "關閉"
 	L_IBDU_OPT22 = "更多"
 	L_IBDU_OPT23 = "點擊來設置"
+	L_IBDU_OPT24 = "Show spell icon"
 	
 	L_IBDU_OPT_COLOR1 = "玩家 Buff 顏色"
 	L_IBDU_OPT_COLOR2 = "玩家 Debuff 顏色"
@@ -163,6 +165,7 @@ else
 	L_IBDU_OPT21 = "Close"
 	L_IBDU_OPT22 = "More"
 	L_IBDU_OPT23 = "Click for settings"
+	L_IBDU_OPT24 = "Show spell icon"
 	
 	L_IBDU_OPT_COLOR1 = "Player Buff Color"
 	L_IBDU_OPT_COLOR2 = "Player Debuff Color"

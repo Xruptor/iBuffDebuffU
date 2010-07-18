@@ -45,6 +45,7 @@ local barDefaults = {
 		['totalBuffCount'] = 40,
 		['totalDebuffCount'] = 40,
 		['limitTime'] = 0,
+		['showSpellIcon'] = true,
 }
 
 local defaults = {
@@ -361,6 +362,14 @@ local TimerOnUpdate = function(self, time)
 			self.text:SetWidth(wChk)
 		end
 		
+		if not IBDU_DB.Opts[self.id].showSpellIcon and self.icon:IsVisible() then
+			self.icon:Hide()
+			self.iconBorder:Hide()
+		elseif IBDU_DB.Opts[self.id].showSpellIcon and not self.icon:IsVisible() then
+			self.icon:Show()
+			self.iconBorder:Show()
+		end
+
 		self.text:SetText(f:SetBarText(self.id, self.spellName, self.rank, self.stacks))
 		self.timer:SetText(f:GetTimeText(self.id, beforeEnd))
 	end

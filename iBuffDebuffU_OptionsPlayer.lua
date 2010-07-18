@@ -128,6 +128,13 @@ function OptionsPlayer:CreateTab1(parent)
 	end)
 	showPlayerDColor:SetPoint('TOP', showPlayerCBO, 'BOTTOM', 0, -1)
 	
+	--show spell icon
+	local showSpellIcon = Options:CreateCheckButton(L_IBDU_OPT24, tabFrame)
+	showSpellIcon:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["player"].showSpellIcon) end)
+	showSpellIcon:SetScript('OnClick', function(self)
+		IBDU_DB.Opts["player"].showSpellIcon = self:GetChecked() or false
+	end)
+	showSpellIcon:SetPoint('TOP', showPlayerDColor, 'BOTTOM', 0, -1)
 	
 	return tabFrame
 	

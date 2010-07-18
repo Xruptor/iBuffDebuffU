@@ -102,6 +102,14 @@ function OptionsTarget:CreateTab1(parent)
 	end)
 	showTargetD:SetPoint('TOP', showTargetB, 'BOTTOM', 0, -1)
 	
+	--show spell icon
+	local showSpellIcon = Options:CreateCheckButton(L_IBDU_OPT24, tabFrame)
+	showSpellIcon:SetScript('OnShow', function(self) self:SetChecked(IBDU_DB.Opts["target"].showSpellIcon) end)
+	showSpellIcon:SetScript('OnClick', function(self)
+		IBDU_DB.Opts["target"].showSpellIcon = self:GetChecked() or false
+	end)
+	showSpellIcon:SetPoint('TOP', showTargetD, 'BOTTOM', 0, -1)
+	
 	return tabFrame
 	
 end
