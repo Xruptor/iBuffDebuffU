@@ -1,24 +1,14 @@
-## Interface: 30300
+## Interface: 40200
 ## Title: iBuffDebuffU
 ## Notes: Displays Buffs/Debuffs on your current target/focus and the player.
 ## Author: Xruptor
-## Version:  2.5
+## Version:  3.0
 ## X-Website: http://xruptor.wowinterface.com
 ## X-Email: Private Message (PM) me at WowInterface.com
 ## X-Category: Buff/Debuff
 ## SavedVariablesPerCharacter: IBDU_DB
 
-lib\LibStub.lua
-lib\CallbackHandler-1.0.lua
-lib\LibSharedMedia-3.0.lua
-lib\LibGratuity-3.0.lua
-lib\LibXMenu-1.0.lua
-lib\tekKonfigAboutPanel.lua
-lib\tekKonfigTopTab.lua
 localization\localization.lua
 
+auraTemplate.xml
 iBuffDebuffU.lua
-iBuffDebuffU_Options.lua
-iBuffDebuffU_OptionsPlayer.lua
-iBuffDebuffU_OptionsTarget.lua
-iBuffDebuffU_OptionsFocus.lua

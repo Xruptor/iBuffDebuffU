@@ -1,0 +1,422 @@
+
+local f = CreateFrame("frame","iBuffDebuffU",UIParent)
+f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
+
+local currentTime
+local buffHeader,debuffHeader
+
+local barDefaults = {
+		["scale"] = 1,
+		["grow"] = true,
+		["width"] = 200,
+		["height"] = 16,
+		["fontSize"] = 12,
+		["alpha"] = 1,
+		["alpha_bg"] = 0.5,
+		["alpha_font"] = 1,
+		["tooltips"] = false,
+		["rank"] = false,
+		["stack"] = true,
+		["bufferdist"] = 4, --distance between bars
+		["hhmmss"] = false,
+		['totalBuffCount'] = 40,
+		['totalDebuffCount'] = 40,
+		['limitTime'] = 0,
+		['showSpellIcon'] = true,
+}
+
+local defaults = {
+	["Opts"] = {
+		["hideblizzbuffs"] = true,
+		["showplayerBuffs"] = true,
+		["showplayerDebuffs"] = true,
+		["showtargetBuffs"] = true,
+		["showtargetDebuffs"] = true,
+		["showfocusBuffs"] = true,
+		["showfocusDebuffs"] = true,
+		['playerDebuffColoring'] = false,
+		['playerCastBuffOnly'] = false,
+		["enable"] = true,
+		["player"] = barDefaults,
+		["target"] = barDefaults,
+		["focus"] = barDefaults,
+		["playerBuffColor"] = {r=0, g=183/255, b=239/255},
+		["playerDebuffColor"] = {r=1, g=0, b=0},
+		["targetBuffColor"] = {r=0, g=1, b=0},
+		["targetDebuffColor"] = {r=1, g=0, b=0},
+		["focusBuffColor"] = {r=0, g=1, b=0},
+		["focusDebuffColor"] = {r=1, g=0, b=0},
+		["statusbar"] = "Minimalist",
+		["font"] = "Fonts\\FRIZQT__.TTF",
+	},
+}
+
+local anchors = {
+		["target"] = "IBDU_TargetAnchor",
+		["focus"] = "IBDU_FocusAnchor",
+		["player"] = "IBDU_PlayerAnchor",
+}
+
+--[[------------------------
+	AURA FUNCTIONS
+--------------------------]]
+
+local function iterateAuras(self, i)
+	i = i + 1
+	local child = self:GetAttribute("child" .. i)
+	if child and child:IsShown() then
+		return i, child, child:GetAttribute("index")
+	end
+end
+
+--[[------------------------
+	HEADERS
+--------------------------]]
+
+local function createHeaders()
+
+	buffHeader = CreateFrame("Frame", "ibdu_Buffs", UIParent, "SecureAuraHeaderTemplate")
+	debuffHeader = CreateFrame("Frame", "ibdu_Debuffs", UIParent, "SecureAuraHeaderTemplate")
+
+	--buff
+	buffHeader:SetAttribute("unit", "player")
+	buffHeader:SetAttribute("filter", "HELPFUL")
+	buffHeader:SetAttribute("template", "idbu_BuffTemplate")
+	buffHeader:SetAttribute("minWidth", 100)
+	buffHeader:SetAttribute("minHeight", 20)
+
+	buffHeader:SetAttribute("point", "TOPRIGHT")
+	buffHeader:SetAttribute("xOffset", 0)
+	buffHeader:SetAttribute("yOffset", -18)
+
+	buffHeader:SetAttribute("separateOwn", 0)
+	buffHeader:SetAttribute("sortMethod", "TIME")
+	buffHeader:SetAttribute("sortDirection","+")
+	buffHeader:SetAttribute("wrapAfter",100)
+	buffHeader:SetAttribute("wrapXOffset", 0)
+	buffHeader:SetAttribute("wrapYOffset", 0)
+	buffHeader:SetAttribute("maxWraps", 100)
+
+	buffHeader:SetAttribute("includeWeapons", 1)
+	buffHeader:SetAttribute("weaponTemplate", "idbu_BuffTemplate")
+
+	--buffHeader:SetPoint("BOTTOMLEFT", _G[anchors["player"]], "TOPLEFT", 0, 0)
+	
+	buffHeader:SetPoint("CENTER", UIParent, "CENTER", 0, -150)
+
+	buffHeader:SetScale(1)
+	buffHeader:SetAlpha(0.8)
+	buffHeader:Show()
+
+	--debuff
+	debuffHeader:SetAttribute("unit", "player")
+	debuffHeader:SetAttribute("filter", "HARMFUL")
+	debuffHeader:SetAttribute("template", "idbu_DebuffTemplate")
+	debuffHeader:SetAttribute("minWidth", 100)
+	debuffHeader:SetAttribute("minHeight", 20)
+
+	debuffHeader:SetAttribute("point", "TOPRIGHT")
+	debuffHeader:SetAttribute("xOffset", 0)
+	debuffHeader:SetAttribute("yOffset", -18)
+
+	debuffHeader:SetAttribute("separateOwn", 0)
+	debuffHeader:SetAttribute("sortMethod", "TIME")
+	debuffHeader:SetAttribute("sortDirection","+")
+	debuffHeader:SetAttribute("wrapAfter",100)
+	debuffHeader:SetAttribute("wrapXOffset", 0)
+	debuffHeader:SetAttribute("wrapYOffset", 0)
+	debuffHeader:SetAttribute("maxWraps", 100)
+
+	debuffHeader:SetPoint("BOTTOMLEFT", _G[anchors["target"]], "TOPLEFT", 0, 0)
+	debuffHeader:SetScale(1)
+	debuffHeader:SetAlpha(0.8)
+	debuffHeader:Show()
+
+	function buffHeader:ActiveAuras()
+		return iterateAuras, self, 0
+	end
+	function debuffHeader:ActiveAuras()
+		return iterateAuras, self, 0
+	end
+
+end
+
+--[[------------------------
+	MAIN
+--------------------------]]
+
+function f:PLAYER_LOGIN()
+	
+	f:UnregisterEvent("PLAYER_LOGIN")
+	f.PLAYER_LOGIN = nil
+	
+	local ver = tonumber(GetAddOnMetadata("iBuffDebuffU","Version")) or 'Unknown'
+	
+	IBDU_DB = IBDU_DB or defaults
+
+	--update the database
+	for k, v in pairs(defaults.Opts) do
+		if IBDU_DB.Opts[k] == nil then
+			IBDU_DB.Opts[k] = v
+		elseif type(v) == 'table' and IBDU_DB.Opts[k] then
+			for x, y in pairs(v) do
+				if IBDU_DB.Opts[k][x] == nil then
+					IBDU_DB.Opts[k][x] = y
+				end
+			end
+		end
+	end
+	
+	--do the anchors
+	f:CreateAnchor(anchors["target"], UIParent, "target")
+	f:CreateAnchor(anchors["focus"], UIParent, "focus")
+	f:CreateAnchor(anchors["player"], UIParent, "player")
+
+	--create our headers
+	createHeaders()
+
+	--register the aura check event
+	f:RegisterEvent("UNIT_AURA")
+	
+	DEFAULT_CHAT_FRAME:AddMessage("|cFF99CC33iBuffDebuffU|r [v|cFFDF2B2B"..ver.."|r] loaded:   /ibdu")
+end
+
+function f:UNIT_AURA(event, unit)
+	if not unit then return end
+	--check for units
+	--if IBDU_DB.Opts[unit] then
+	--end
+	if unit == "player" then
+		currentTime = GetTime()
+		for key,button in buffHeader:ActiveAuras() do
+			f:updateAuraBar(button, currentTime, "HELPFUL", unit)
+			print(UnitAura("player", button:GetID(), "HELPFUL"))
+		end
+	  --for _,button in debuffHeader:ActiveChildren() do updateBar(button, currentTime, "HARMFUL") end
+
+	end
+end
+
+--[[------------------------
+	ANCHOR
+--------------------------]]
+
+function f:CreateAnchor(name, parent, unit)
+
+	--create the anchor
+	local frameAnchor = CreateFrame("Frame", name, parent)
+	
+	frameAnchor:SetWidth(IBDU_DB.Opts[unit].width + 10)
+	frameAnchor:SetHeight(IBDU_DB.Opts[unit].height + 10)
+	frameAnchor:SetMovable(true)
+	frameAnchor:SetClampedToScreen(true)
+	frameAnchor:EnableMouse(true)
+	
+	frameAnchor:ClearAllPoints()
+	frameAnchor:SetPoint("CENTER", parent, "CENTER", 0, 0)
+	frameAnchor:SetFrameStrata("DIALOG")
+	
+	frameAnchor:SetBackdrop({
+			bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+			tile = true,
+			tileSize = 16,
+			edgeSize = 16,
+			insets = { left = 5, right = 5, top = 5, bottom = 5 }
+	})
+	
+	frameAnchor:SetBackdropColor(0.75,0,0,1)
+	frameAnchor:SetBackdropBorderColor(0.75,0,0,1)
+	
+	local stringT = frameAnchor:CreateFontString()
+	stringT:SetAllPoints(frameAnchor)
+	stringT:SetFontObject("GameFontNormalSmall")
+	stringT:SetText(unit..L_IBDU_ANCHOR)
+	
+	frameAnchor:SetScript("OnMouseDown", function(frame, button)
+		if button == "RightButton" then
+			frame.isMoving = nil
+			frame:StopMovingOrSizing()
+			f:SaveLayout(frame:GetName())
+			f:ToggleAnchors(frame)
+		else
+			frame:IsMovable()
+			frame.isMoving = true
+			frame:StartMoving()
+		end
+	end)
+
+	frameAnchor:SetScript("OnMouseUp", function(frame, button)
+		frame.isMoving = nil
+		frame:StopMovingOrSizing()
+		f:SaveLayout(frame:GetName())
+	end)
+
+	frameAnchor:Hide() -- hide it by default
+	
+	f:RestoreLayout(name)
+end
+
+--[[------------------------
+	BAR FUNCTIONS
+--------------------------]]
+
+function f:CreateTimers(button, unit)
+	
+	--local textureSML = sharedMedia:Fetch(sharedMedia.MediaType.STATUSBAR, IBDU_DB.Opts.statusbar)
+	--local fontSML = sharedMedia:Fetch(sharedMedia.MediaType.FONT, IBDU_DB.Opts.font)
+	
+	button:SetWidth(IBDU_DB.Opts[unit].width)
+	button:SetHeight(IBDU_DB.Opts[unit].height)
+
+	button.bar = CreateFrame("StatusBar", nil, button)
+	button.bar:SetWidth(IBDU_DB.Opts[unit].width)
+	button.bar:SetHeight(IBDU_DB.Opts[unit].height)
+	button.bar:SetPoint("TOPRIGHT",button,"TOPRIGHT")
+	--button:SetStatusBarTexture(textureSML)
+	button.bar:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\media\\Minimalist")
+	button.bar:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
+	button.bar:SetAlpha(IBDU_DB.Opts[unit].alpha)
+
+	button.bg = CreateFrame("StatusBar", nil, button.bar)
+	button.bg:SetMinMaxValues(0, 1)
+	button.bg:SetValue(1)
+	button.bg:SetAllPoints(button.bar)
+	button.bg:SetFrameLevel(0)
+	--button.bg:SetStatusBarTexture(textureSML)
+	button.bg:SetStatusBarTexture("Interface\\AddOns\\iBuffDebuffU\\media\\Minimalist")
+	button.bg:SetStatusBarColor(1, 1, 1, IBDU_DB.Opts[unit].alpha_bg)
+	button.bg:SetAlpha(IBDU_DB.Opts[unit].alpha_bg)
+
+	--icon
+	button.icon = button.bar:CreateTexture(nil, "ARTWORK")
+	button.icon:SetPoint("TOPLEFT", button.bar, "TOPLEFT", -IBDU_DB.Opts[unit].height, 0)
+	button.icon:SetHeight(IBDU_DB.Opts[unit].height)
+	button.icon:SetWidth(IBDU_DB.Opts[unit].height)
+	button.icon:SetTexture("Interface\\Icons\\Spell_Shadow_Shadowbolt")
+	button.icon:SetVertexColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
+	button.icon:Show()
+	
+	button.iconBorder = button.bar:CreateTexture(nil, "OVERLAY")
+	button.iconBorder:SetPoint("TOPLEFT", button.icon)
+	button.iconBorder:SetPoint("BOTTOMRIGHT", button.icon)
+	button.iconBorder:SetVertexColor(1, 1, 1, IBDU_DB.Opts[unit].alpha)
+	button.iconBorder:Show()
+	
+	--name
+	button.text = button.bar:CreateFontString(nil, "OVERLAY")
+	button.text:SetJustifyH("LEFT")
+	button.text:SetJustifyV("CENTER")
+	button.text:SetPoint("TOPLEFT", button.bar, "TOPLEFT", 2, 0)
+	button.text:SetHeight(IBDU_DB.Opts[unit].height)
+	button.text:SetWidth(IBDU_DB.Opts[unit].width)
+	--button.text:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
+	button.text:SetFont("Fonts\\FRIZQT__.TTF", IBDU_DB.Opts[unit].fontSize)
+	button.text:SetShadowOffset(1, -1)
+	button.text:SetShadowColor(0, 0, 0, 1)
+	button.text:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
+	
+	--timer
+	button.timer = button.bar:CreateFontString(nil, "OVERLAY")
+	button.timer:SetJustifyH("RIGHT")
+	button.timer:SetJustifyV("CENTER")
+	button.timer:SetPoint("TOPRIGHT", button.bar, "TOPRIGHT", -1, 0)
+	button.timer:SetHeight(IBDU_DB.Opts[unit].height)
+	--button.timer:SetFont(fontSML, IBDU_DB.Opts[unit].fontSize)
+	button.timer:SetFont("Fonts\\FRIZQT__.TTF", IBDU_DB.Opts[unit].fontSize)
+	button.timer:SetShadowOffset(1, -1)
+	button.timer:SetShadowColor(0, 0, 0, 1)
+	button.timer:SetAlpha(IBDU_DB.Opts[unit].alpha_font)
+
+end
+
+function f:updateAuraBar(button, currentTime, auraType, unit)
+	if not button.icon then f:CreateTimers(button, unit) end
+
+	local name,_, icon, count, debuffType, duration, endTime = UnitAura(unit, button:GetID(), auraType)
+	if name then
+		button.icon:SetTexture(icon)
+		if duration > 0 then
+			timeLeft = endTime-currentTime
+			button.bar:SetMinMaxValues(0,duration)
+			button.bar:SetValue(timeLeft)
+			button.timer:SetText(timeLeft)
+		else
+			button.bar:SetMinMaxValues(0,1)
+			button.bar:SetValue(0)
+			button.timer:SetText("")
+		end
+
+		local color = IBDU_DB.Opts[unit.."DebuffColor"]
+
+		button.bar:SetStatusBarColor(color.r, color.g, color.b, 0.80)
+		button.bg:SetStatusBarColor(color.r, color.g, color.b, 0.30)
+	end
+	
+	buffHeader:SetPoint("BOTTOMLEFT", _G[anchors["player"]], "TOPLEFT", 0, 0)
+
+end
+
+--[[------------------------
+	POSITION FUNCTIONS
+--------------------------]]
+
+function f:SaveLayout(frame)
+
+	if not IBDU_DB then IBDU_DB = {} end
+
+	local opt = IBDU_DB[frame] or nil;
+
+	if opt == nil then
+		IBDU_DB[frame] = {
+			["point"] = "CENTER",
+			["relativePoint"] = "CENTER",
+			["PosX"] = 0,
+			["PosY"] = 0,
+		}
+		opt = IBDU_DB[frame];
+	end
+
+	local f = getglobal(frame);
+	local scale = f:GetEffectiveScale();
+	opt.PosX = f:GetLeft() * scale;
+	opt.PosY = f:GetTop() * scale;
+end
+
+function f:RestoreLayout(frame)
+
+	if not IBDU_DB then IBDU_DB = {} end
+	
+	local f = getglobal(frame);
+	local opt = IBDU_DB[frame] or nil;
+
+	if opt == nil then
+		IBDU_DB[frame] = {
+			["point"] = "CENTER",
+			["relativePoint"] = "CENTER",
+			["PosX"] = 0,
+			["PosY"] = 0,
+		}
+		opt = IBDU_DB[frame];
+	end
+
+	local x = opt.PosX;
+	local y = opt.PosY;
+	local s = f:GetEffectiveScale();
+
+	if (not x or not y) or (x==0 and y==0) then
+		f:ClearAllPoints();
+		f:SetPoint("CENTER", UIParent, "CENTER", 0, 0);
+		return 
+	end
+
+	--calculate the scale
+	x,y = x/s,y/s;
+
+	--set the location
+	f:ClearAllPoints();
+	f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y);
+
+end
+
+if IsLoggedIn() then f:PLAYER_LOGIN() else f:RegisterEvent("PLAYER_LOGIN") end

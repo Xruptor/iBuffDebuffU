@@ -1,0 +1,54 @@
+<Size x="200" y="18"/> in XML size has to be resized if we are going to modify them
+
+
+--[[------------------------
+	BUFF TEMPLATE
+--------------------------]]
+
+local buffTemplate = CreateFrame("Button", "idbu_BuffTemplate", UIParent, "SecureActionButtonTemplate")
+buffTemplate:SetClampedToScreen(true)
+buffTemplate:SetMovable(false)
+buffTemplate:EnableMouse(true)
+buffTemplate:SetAttribute("type", "cancelaura")	
+buffTemplate:SetScript("OnLoad", function(self)
+	self:RegisterForClicks("RightButtonUp")
+end)
+buffTemplate:SetScript("OnEnter", function(self)
+	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+	GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2)
+	--slots 16-18 = weapon,range,relic
+	if self:GetAttribute("target-slot") > 15 and self:GetAttribute("target-slot") < 19  then
+		GameTooltip:SetInventoryItem("player", self:GetID())
+	else
+		GameTooltip:SetUnitAura("player", self:GetID(), "HELPFUL")
+	end
+end)
+buffTemplate:SetScript("OnLeave", function(self)
+	GameTooltip:Hide()
+end)	
+
+--[[------------------------
+	DEBUFF TEMPLATE
+--------------------------]]
+
+local debuffTemplate = CreateFrame("Button", "idbu_DebuffTemplate", UIParent, "SecureActionButtonTemplate")
+debuffTemplate:SetClampedToScreen(true)
+debuffTemplate:SetMovable(false)
+debuffTemplate:EnableMouse(true)
+debuffTemplate:SetAttribute("type", "cancelaura")	
+debuffTemplate:SetScript("OnLoad", function(self)
+	self:RegisterForClicks("RightButtonUp")
+end)
+debuffTemplate:SetScript("OnEnter", function(self)
+	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+	GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2)
+	--slots 16-18 = weapon,range,relic
+	if self:GetAttribute("target-slot") > 15 and self:GetAttribute("target-slot") < 19  then
+		GameTooltip:SetInventoryItem("player", self:GetID())
+	else
+		GameTooltip:SetUnitAura("player", self:GetID(), "HARMFUL")
+	end
+end)
+debuffTemplate:SetScript("OnLeave", function(self)
+	GameTooltip:Hide()
+end)
